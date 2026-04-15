@@ -1,0 +1,65 @@
+{
+ "name": "smoke-1",
+ "generation": 3,
+ "slot": 1,
+ "disk": "/d/x.ext4",
+ "api_sock": "/r/fc.sock",
+ "vsock_path": "/r/v.sock",
+ "pid": 42,
+ "state": "pooled",
+ "template_id": "web-v1",
+ "vcpus": 1,
+ "mem_mib": 512,
+ "conn_limit": 64,
+ "netns": "birdfeeder-1",
+ "tap": "bf1",
+ "mac": "06:00:ac:10:00:02",
+ "guest_ip": "172.20.0.6",
+ "gateway_ip": "172.20.0.5",
+ "endpoints": {
+  "http": {
+   "host_port": 31016,
+   "guest_port": 8080
+  }
+ },
+ "manifest": {
+  "containers": [
+   {
+    "name": "web",
+    "blob": "web",
+    "args": [
+     "sh",
+     "-c",
+     "a && b <c>"
+    ],
+    "env": {
+     "A": "1",
+     "B": "2"
+    }
+   }
+  ],
+  "readiness": [
+   {
+    "name": "http",
+    "tcp_port": 8080
+   }
+  ]
+ },
+ "version": 1,
+ "labels": {
+  "k": "v"
+ },
+ "egress": {
+  "cidr_allowlist": [
+   "1.1.1.0/24"
+  ],
+  "fqdn_allowlist": [
+   "example.com"
+  ]
+ },
+ "fqdn_addrs": {
+  "93.184.216.34": "2026-11-03T19:00:00.000000005Z"
+ },
+ "created_at": "2026-11-03T10:00:00.123456789Z",
+ "pooled_at": "2026-11-03T17:00:01Z"
+}

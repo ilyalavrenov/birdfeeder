@@ -1,0 +1,18 @@
+# images and digests are copied from the template that ships with the Lima version in mise.toml.
+base: template:ubuntu-26.04
+vmType: vz
+nestedVirtualization: true
+cpus: 2
+memory: 4GiB
+disk: 20GiB
+mounts: []
+containerd:
+  system: false
+  user: false
+portForwards:
+  - guestIP: 0.0.0.0
+    # Lima 2 defaults this to true, which lets loopback listeners get forwarded.
+    guestIPMustBeZero: false
+    proto: any
+    guestPortRange: [1, 65535]
+    ignore: true

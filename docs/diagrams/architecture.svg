@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 380" width="940" height="380" role="img" aria-label="your app sends a claim to the dispatcher, which routes it to a Linux host's roost; roost runs the microVMs, and the app sends workload traffic straight to its claimed microVM; microVMs restore from a snapshot store on local disk or S3">
+<style>
+  svg { --bg: #ffffff; --ink: #1f2328; --muted: #59636e; --line: #8c959f; --card: #f6f8fa; --edge: #d1d9e0; --host: #fbfcfd; --accent: #0969da; --accent-bg: #ddf4ff; }
+  @media (prefers-color-scheme: dark) {
+    svg { --bg: #0d1117; --ink: #f0f6fc; --muted: #9198a1; --line: #656c76; --card: #151b23; --edge: #3d444d; --host: #10151c; --accent: #79c0ff; --accent-bg: #0c2d6b; }
+  }
+  text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; fill: var(--ink); }
+  .title { font-size: 15px; font-weight: 600; text-anchor: middle; }
+  .sub { font-size: 12px; fill: var(--muted); text-anchor: middle; }
+  .label { font-size: 12px; fill: var(--muted); text-anchor: middle; }
+  .caps { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; fill: var(--muted); }
+  .card { fill: var(--card); stroke: var(--edge); stroke-width: 1; }
+  .hot { fill: var(--accent-bg); stroke: var(--accent); stroke-width: 1.25; }
+  .hot-text { fill: var(--accent); }
+  .host { fill: var(--host); stroke: var(--edge); stroke-width: 1; }
+  .ghost { fill: none; stroke: var(--edge); stroke-width: 1; stroke-dasharray: 4 4; }
+  .wire { fill: none; stroke: var(--line); stroke-width: 1.5; }
+  .wire-hot { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+  .dashed { stroke-dasharray: 5 4; }
+  .head { fill: var(--line); }
+  .head-hot { fill: var(--accent); }
+</style>
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0 0 L10 5 L0 10 z"/></marker>
+  <marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-hot" d="M0 0 L10 5 L0 10 z"/></marker>
+</defs>
+  <!-- another host behind this one: the dispatcher routes across hosts. -->
+  <rect class="ghost" x="572" y="30" width="348" height="252" rx="14"/>
+  <rect class="host" x="560" y="18" width="348" height="252" rx="14"/>
+  <text class="caps" x="580" y="40">LINUX HOST</text>
+
+  <rect class="card" x="20" y="52" width="150" height="56" rx="10"/>
+  <text class="title" x="95" y="77">your app</text>
+  <text class="sub" x="95" y="95">agent, CI job</text>
+
+  <rect class="card" x="270" y="52" width="190" height="56" rx="10"/>
+  <text class="title" x="365" y="77">dispatcher</text>
+  <text class="sub" x="365" y="95">stateless claim routing</text>
+
+  <rect class="card" x="580" y="52" width="308" height="56" rx="10"/>
+  <text class="title" x="734" y="77">roost</text>
+  <text class="sub" x="734" y="95">pools, egress rules, endpoints</text>
+
+  <rect class="hot" x="580" y="172" width="92" height="76" rx="10"/>
+  <text class="title hot-text" x="626" y="205">microVM</text>
+  <text class="sub hot-text" x="626" y="224">claimed</text>
+  <rect class="card" x="688" y="172" width="92" height="76" rx="10"/>
+  <text class="title" x="734" y="205">microVM</text>
+  <text class="sub" x="734" y="224">pooled</text>
+  <rect class="card" x="796" y="172" width="92" height="76" rx="10"/>
+  <text class="title" x="842" y="205">microVM</text>
+  <text class="sub" x="842" y="224">pooled</text>
+
+  <path class="wire" d="M170 80 H268" marker-end="url(#a)"/>
+  <text class="label" x="219" y="72">claim</text>
+  <path class="wire" d="M460 80 H578" marker-end="url(#a)"/>
+  <text class="label" x="510" y="72">route</text>
+
+  <path class="wire" d="M626 108 V170" marker-end="url(#a)"/>
+  <path class="wire" d="M734 108 V170" marker-end="url(#a)"/>
+  <path class="wire" d="M842 108 V170" marker-end="url(#a)"/>
+
+  <path class="wire-hot" d="M95 108 V210 H578" marker-end="url(#h)"/>
+  <text class="label" x="330" y="200">workload traffic, straight to the endpoint</text>
+
+  <rect class="card" x="580" y="318" width="308" height="48" rx="10"/>
+  <text class="title" x="734" y="338">snapshot store</text>
+  <text class="sub" x="734" y="355">local disk or S3</text>
+  <path class="wire dashed" d="M734 316 V250" marker-end="url(#a)"/>
+  <text class="label" x="742" y="300" style="text-anchor: start">restore: working set, then faults</text>
+</svg>

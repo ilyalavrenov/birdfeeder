@@ -1,0 +1,32 @@
+[store]
+dir = "target/nextest"
+
+[profile.default]
+slow-timeout = { period = "30s", terminate-after = 4 }
+
+[[profile.default.overrides]]
+filter = "package(vmm) & binary(kvm)"
+slow-timeout = { period = "60s", terminate-after = 5 }
+
+[[profile.default.overrides]]
+filter = "package(guestnet) & binary(root)"
+test-group = "netns"
+
+[[profile.default.overrides]]
+filter = "package(smoke) & test(=bench_snapshots)"
+slow-timeout = { period = "60s", terminate-after = 30 }
+
+[[profile.default.overrides]]
+filter = "package(smoke)"
+test-group = "host"
+slow-timeout = { period = "60s", terminate-after = 10 }
+
+[test-groups]
+netns = { max-threads = 1 }
+host = { max-threads = 1 }
+
+[profile.ci]
+fail-fast = false
+
+[profile.ci.junit]
+path = "junit.xml"

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+#MISE description="run a command on Linux: here on a Linux host, else in a copy of the source in the Lima VM"
+#MISE hide=true
+set -euo pipefail
+
+if [[ $(uname -s) == Linux ]]; then
+  exec "$@"
+fi
+
+vm=birdfeeder
+remote() { limactl shell --workdir=/tmp "$vm" -- "$@"; }
+dir=$(remote mktemp -d /tmp/birdfeeder-source.XXXXXXXX)
+trap 'remote rm -rf -- "$dir"' EXIT
+git ls-files -z --cached --others --exclude-standard | grep -zvxFf <(git ls-files --deleted) |
+  tar --no-xattrs --null -T - -cf - | remote tar -xf - -C "$dir"
+limactl shell --workdir="$dir" "$vm" -- "$@"

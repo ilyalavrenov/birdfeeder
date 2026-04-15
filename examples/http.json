@@ -1,0 +1,14 @@
+{
+  "containers": [
+    {
+      "name": "web",
+      "blob": "alpine"
+    }
+  ],
+  "readiness": [
+    {
+      "name": "http",
+      "tcp_port": 8080
+    }
+  ]
+}

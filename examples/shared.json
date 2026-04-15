@@ -1,0 +1,40 @@
+{
+  "volumes": [
+    "data"
+  ],
+  "containers": [
+    {
+      "name": "writer",
+      "blob": "alpine",
+      "mounts": {
+        "data": "/shared"
+      },
+      "env": {
+        "MESSAGE": "hello through a shared volume"
+      },
+      "args": [
+        "/bin/sh",
+        "-c",
+        "printf \"%s\\n\" \"$MESSAGE\" > /shared/index.html; echo \"shared volume initialized\"; exec sleep 3600"
+      ]
+    },
+    {
+      "name": "web",
+      "blob": "alpine",
+      "mounts": {
+        "data": "/shared"
+      },
+      "args": [
+        "/bin/sh",
+        "-c",
+        "while [ ! -s /shared/index.html ]; do sleep .1; done; exec /usr/local/bin/serve --root /shared"
+      ]
+    }
+  ],
+  "readiness": [
+    {
+      "name": "http",
+      "tcp_port": 8080
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="run local tests or Linux VM checks"
+#USAGE arg "[suite]" default="unit" help="unit: local cargo tests; linux: unit and integration tests; smoke: all VM scenarios; integration: KVM, nftables, and slot-reuse checks; services, workloads, lifecycle, telemetry, registry, snapshot: one smoke suite with existing guest artifacts; bench: cold vs snapshot boot timings" {
+#USAGE   choices "unit" "linux" "smoke" "integration" "services" "workloads" "lifecycle" "telemetry" "registry" "snapshot" "bench"
+#USAGE }
+set -euo pipefail
+
+case "${usage_suite?}" in
+  unit) exec bash dev/nextest.sh unit ;;
+  *) exec mise run vm bash dev/run-linux.sh "${usage_suite?}" ;;
+esac

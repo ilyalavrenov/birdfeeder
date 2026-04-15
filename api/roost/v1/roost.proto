@@ -1,0 +1,65 @@
+syntax = "proto3";
+package birdfeeder.roost.v1;
+service RoostService {
+  rpc ClaimSession(ClaimSessionRequest) returns (ClaimSessionResponse);
+  rpc DeleteSession(DeleteSessionRequest) returns (DeleteSessionResponse);
+  rpc GetSession(GetSessionRequest) returns (GetSessionResponse);
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse);
+  rpc SetSessionExpiry(SetSessionExpiryRequest) returns (SetSessionExpiryResponse);
+  rpc HostStatus(HostStatusRequest) returns (HostStatusResponse);
+}
+enum SessionState {
+  SESSION_STATE_UNSPECIFIED = 0;
+  SESSION_STATE_BOOTING = 1;
+  SESSION_STATE_POOLED = 2;
+  SESSION_STATE_CLAIMED = 3;
+  SESSION_STATE_STOPPING = 4;
+  // only returned for an idempotency key whose session got deleted inside the key's retention window.
+  SESSION_STATE_DELETED = 5;
+}
+message Session {
+  string name = 1;
+  map<string, string> endpoints = 2;
+  uint64 generation = 3;
+  SessionState state = 4;
+  string host_id = 5;
+  string template_id = 6;
+  map<string, string> labels = 7;
+}
+message EgressPolicy {
+  repeated string cidr_allowlist = 1;
+  repeated string fqdn_allowlist = 2;
+  bool smtp_allowed = 3;
+}
+message ClaimSessionRequest {
+  string template_id = 1;
+  map<string, string> labels = 2;
+  EgressPolicy egress = 3;
+  int64 idle_timeout_ms = 4;
+  // retrying a claim with the same key and the same request gets you back the session that key already
+  // claimed, not a new one. same key with a different request, or after its session was deleted, is
+  // failed_precondition.
+  string idempotency_key = 5;
+}
+message ClaimSessionResponse { Session session = 1; }
+message DeleteSessionRequest { string name = 1; uint64 generation = 2; }
+message DeleteSessionResponse {}
+// exactly one of name and idempotency_key.
+message GetSessionRequest { string name = 1; string idempotency_key = 2; }
+message GetSessionResponse { Session session = 1; }
+// only sessions that have every one of these labels with the same value. empty lists all sessions.
+message ListSessionsRequest { map<string, string> labels = 1; }
+message ListSessionsResponse { repeated Session sessions = 1; }
+message SetSessionExpiryRequest { string name = 1; uint64 generation = 2; int64 expires_at_ms = 3; }
+message SetSessionExpiryResponse {}
+message HostStatusRequest {}
+message HostStatusResponse {
+  int32 capacity = 1;
+  int32 running = 2;
+  repeated PoolFill pools = 3;
+  int32 max_vcpus = 4;
+  int32 reserved_vcpus = 5;
+  int32 max_memory_mib = 6;
+  int32 reserved_memory_mib = 7;
+}
+message PoolFill { string template_id = 1; int32 ready = 2; int32 target = 3; string fingerprint = 4; }

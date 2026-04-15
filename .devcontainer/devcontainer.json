@@ -1,0 +1,15 @@
+{
+  "name": "birdfeeder",
+  "image": "mcr.microsoft.com/devcontainers/base:2.1.7-ubuntu24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/sshd:1.1.0": {}
+  },
+  "privileged": true,
+  "hostRequirements": { "cpus": 2, "memory": "8gb" },
+  "postStartCommand": "sudo bash .devcontainer/post-start.sh",
+  "updateContentCommand": "sudo bash scripts/setup-linux.sh --install-only && mise trust && mise run dev build && mise cache clear",
+  "postCreateCommand": "sudo bash scripts/setup-linux.sh && mise run dev hostcheck",
+  "customizations": {
+    "vscode": { "extensions": ["rust-lang.rust-analyzer"] }
+  }
+}

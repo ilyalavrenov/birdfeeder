@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+#MISE description="check formatting and static analysis"
+set -euo pipefail
+
+step() { printf '==> %s\n' "$*"; }
+
+step "validating mise tasks"
+mise tasks validate
+
+step "checking shell script syntax"
+for script in mise-tasks/* dev/*.sh dev/guest/*.sh scripts/*.sh; do bash -n "$script"; done
+echo "all scripts parse"
+
+step "checking Rust formatting"
+cargo fmt --check
+
+# clippy only sees one target's code. on a Mac we lint for Linux, since that's where the handler's
+# code lives, with zig standing in for the Linux C compiler ring's build script needs.
+step "running clippy"
+target=
+if [[ $(uname -s) == Darwin ]]; then
+  target=aarch64-unknown-linux-gnu
+  export CC_aarch64_unknown_linux_gnu=$PWD/dev/zig-cc.sh
+fi
+cargo clippy --locked --all-targets ${target:+--target "$target"} -- -D warnings
+
+step "checking Rust dependencies: advisories, licenses, sources"
+# dependencies are frozen at 2026-04-15, so advisories published since then report without failing.
+cargo deny --locked check -W vulnerability -W unsound -W unmaintained -W yanked
+
+step "checking for unused Rust dependencies"
+cargo shear
+
+step "running buf lint"
+buf lint
+
+# origin/main, not main. CI checks out a detached merge ref with no local main branch.
+step "checking proto wire compatibility against origin/main"
+buf breaking --against '.git#ref=origin/main'

@@ -1,0 +1,109 @@
+name: validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ (github.event.action == 'labeled' && github.event.label.name != 'integration') && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    if: github.event.action != 'labeled' || github.event.label.name == 'integration'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HEAVY: ${{ github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'integration') }}
+      MISE_LOCKED: "1"
+      MISE_RUSTUP_HOME: /home/runner/.local/share/mise/rustup
+      CARGO_PROFILE_RELEASE_LTO: "false"
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
+      CARGO_PROFILE_RELEASE_OPT_LEVEL: "1"
+      CARGO_PROFILE_DEV_DEBUG: line-tables-only
+      NEXTEST_PROFILE: ci
+      RUST_BACKTRACE: "1"
+      RUST_LIB_BACKTRACE: "0"
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - if: github.event_name == 'pull_request'
+        id: changes
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        with:
+          filters: |
+            workflows:
+              - '.github/**'
+      - if: github.event_name != 'pull_request' || steps.changes.outputs.workflows == 'true'
+        uses: reviewdog/action-actionlint@6fb7acc99f4a1008869fa8a0f09cfca740837d9d # v1.72.0
+        with:
+          reporter: github-check
+          filter_mode: nofilter
+          fail_level: error
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: github.event_name != 'pull_request' || steps.changes.outputs.workflows == 'true'
+        uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e # v0.5.3
+        with:
+          advanced-security: false
+          annotations: true
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          # renovate: datasource=github-releases depName=jdx/mise
+          version: "v2026.4.14"
+      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          cache-bin: false
+          cache-directories: ~/.cargo/advisory-dbs
+          save-if: ${{ github.event_name == 'push' }}
+      - run: du -h -d 2 target ~/.cargo/registry | sort -h | tail -n 12
+      - run: mise run check
+      - name: check generated code
+        run: |
+          mise run generate
+          git diff --exit-code
+      - run: mise run test
+      - if: env.HEAVY == 'true'
+        run: |
+          sudo systemctl stop docker.socket docker.service
+          sudo iptables -P FORWARD ACCEPT
+      - if: env.HEAVY == 'true'
+        run: sudo env PATH="$PATH" bash scripts/setup-linux.sh
+      - if: env.HEAVY == 'true'
+        run: mise run test integration
+      - if: env.HEAVY == 'true'
+        run: mise run test smoke
+      - if: failure() && env.HEAVY == 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/smoke-logs"
+          sudo find /var/lib/birdfeeder/smoke.* /run/birdfeeder-smoke.* -type f -name '*.log*' \
+            -exec cp --parents {} "$RUNNER_TEMP/smoke-logs" \; 2>/dev/null || true
+          sudo iptables -S FORWARD
+          sudo nft list ruleset | tee "$RUNNER_TEMP/smoke-logs/nft-ruleset.txt" > /dev/null
+          sudo chown -R "$USER" "$RUNNER_TEMP/smoke-logs"
+      - if: failure() && env.HEAVY == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: smoke-logs
+          path: ${{ runner.temp }}/smoke-logs
+          if-no-files-found: ignore
+      - if: ${{ !cancelled() }}
+        uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386 # v6.4.0
+        with:
+          report_paths: target/nextest/reports/*.xml
+          check_name: rust tests
+          require_tests: true
+          detailed_summary: true
+          include_time_in_summary: true

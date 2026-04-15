@@ -1,0 +1,46 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 127.0.0.1:4317
+      http:
+        endpoint: 127.0.0.1:4318
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 128
+    spike_limit_mib: 32
+  batch:
+    timeout: 200ms
+    send_batch_size: 128
+    send_batch_max_size: 256
+exporters:
+  file/logs:
+    path: ${env:BIRDFEEDER_TELEMETRY_DIR}/logs.jsonl
+    flush_interval: 200ms
+    rotation: {max_megabytes: 10, max_backups: 1}
+  file/traces:
+    path: ${env:BIRDFEEDER_TELEMETRY_DIR}/traces.jsonl
+    flush_interval: 200ms
+    rotation: {max_megabytes: 10, max_backups: 1}
+  file/metrics:
+    path: ${env:BIRDFEEDER_TELEMETRY_DIR}/metrics.jsonl
+    flush_interval: 200ms
+    rotation: {max_megabytes: 10, max_backups: 1}
+service:
+  telemetry:
+    metrics:
+      level: none
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [file/logs]
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [file/traces]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [file/metrics]

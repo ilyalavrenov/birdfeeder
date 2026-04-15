@@ -1,0 +1,15 @@
+[tools]
+buf = "1.68.1"
+# Linux hosts run the VM-bound tasks in place.
+lima = { version = "2.1.1", os = ["macos"] }
+# the gnu target and zig (dev/zig-cc.sh) let a Mac lint the Linux-only crates; musl builds the static
+# guest binaries. the minimal profile keeps rust-docs out of CI's cached toolchain.
+rust = { version = "1.94.1", profile = "minimal", components = "rustfmt,clippy", targets = "aarch64-unknown-linux-gnu,x86_64-unknown-linux-musl,aarch64-unknown-linux-musl" }
+zig = { version = "0.16.0", os = ["macos"] }
+cargo-deny = "0.19.4"
+# not in mise's registry; release tags carry the cargo-nextest- prefix.
+"github:nextest-rs/nextest" = { version = "cargo-nextest-0.9.133", bin = "cargo-nextest" }
+"github:Boshen/cargo-shear" = "1.11.2"
+# smoke fixtures. the release also ships otelcol-contrib, otelcol-k8s and others; matching picks the core one.
+"github:open-telemetry/opentelemetry-collector-releases" = { version = "0.150.1", os = ["linux"], matching = "otelcol_" }
+"github:seaweedfs/seaweedfs" = { version = "4.20", os = ["linux"] }

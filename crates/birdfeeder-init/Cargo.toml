@@ -1,0 +1,28 @@
+[package]
+name = "birdfeeder-init"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow = "1.0.102"
+guestapi = { path = "../guestapi", default-features = false }
+humantime = "2.3.0"
+libc = "0.2.185"
+nix = { version = "0.31.2", features = ["fs", "mount", "poll", "time"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+signal-hook = "0.4.4"
+socket2 = { version = "0.6.3", features = ["all"] }
+thiserror = "2.0.18"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", default-features = false, features = ["fmt", "json", "std"] }
+ureq = { version = "3.3.0", default-features = false }
+
+[dev-dependencies]
+rstest = "0.26.1"
+tempfile = "3.27.0"

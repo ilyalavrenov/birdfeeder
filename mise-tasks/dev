@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#MISE description="manage Lima; deploy installs binaries under /usr/local/libexec/birdfeeder, artifacts rebuilds the guest images, build warms the smoke builds, hostcheck checks the host"
+#USAGE arg "[action]" default="status" help="Lima lifecycle (macOS only), deployment, builds, or host check; on Linux the rest run on the host" {
+#USAGE   choices "up" "down" "status" "deploy" "artifacts" "build" "hostcheck"
+#USAGE }
+set -euo pipefail
+
+vm=birdfeeder
+case "${usage_action?}" in
+  up)
+    if limactl list --format '{{.Name}}' | grep -qx "$vm"; then
+      limactl start --tty=false "$vm"
+    else
+      limactl start --name="$vm" --tty=false dev/lima.yaml
+    fi
+    mise run vm sudo bash scripts/setup-linux.sh
+    exec mise run vm bash dev/run-linux.sh hostcheck
+    ;;
+  down) exec limactl stop "$vm" ;;
+  status) exec limactl list "$vm" ;;
+  deploy|artifacts|build|hostcheck) exec mise run vm bash dev/run-linux.sh "${usage_action?}" ;;
+esac

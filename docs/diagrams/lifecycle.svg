@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 184" width="940" height="184" role="img" aria-label="a guest goes from booting to pooled to claimed to stopping; each claim starts a refill boot">
+<style>
+  svg { --bg: #ffffff; --ink: #1f2328; --muted: #59636e; --line: #8c959f; --card: #f6f8fa; --edge: #d1d9e0; --host: #fbfcfd; --accent: #0969da; --accent-bg: #ddf4ff; }
+  @media (prefers-color-scheme: dark) {
+    svg { --bg: #0d1117; --ink: #f0f6fc; --muted: #9198a1; --line: #656c76; --card: #151b23; --edge: #3d444d; --host: #10151c; --accent: #79c0ff; --accent-bg: #0c2d6b; }
+  }
+  text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; fill: var(--ink); }
+  .title { font-size: 15px; font-weight: 600; text-anchor: middle; }
+  .sub { font-size: 12px; fill: var(--muted); text-anchor: middle; }
+  .label { font-size: 12px; fill: var(--muted); text-anchor: middle; }
+  .caps { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; fill: var(--muted); }
+  .card { fill: var(--card); stroke: var(--edge); stroke-width: 1; }
+  .hot { fill: var(--accent-bg); stroke: var(--accent); stroke-width: 1.25; }
+  .hot-text { fill: var(--accent); }
+  .host { fill: var(--host); stroke: var(--edge); stroke-width: 1; }
+  .ghost { fill: none; stroke: var(--edge); stroke-width: 1; stroke-dasharray: 4 4; }
+  .wire { fill: none; stroke: var(--line); stroke-width: 1.5; }
+  .wire-hot { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+  .dashed { stroke-dasharray: 5 4; }
+  .head { fill: var(--line); }
+  .head-hot { fill: var(--accent); }
+</style>
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0 0 L10 5 L0 10 z"/></marker>
+  <marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-hot" d="M0 0 L10 5 L0 10 z"/></marker>
+</defs>
+  <rect class="card" x="20" y="40" width="180" height="64" rx="10"/>
+  <text class="title" x="110" y="67">booting</text>
+  <text class="sub" x="110" y="87">cold boot or restore</text>
+
+  <rect class="card" x="260" y="40" width="180" height="64" rx="10"/>
+  <text class="title" x="350" y="67">pooled</text>
+  <text class="sub" x="350" y="87">ready, up to pool_target</text>
+
+  <rect class="hot" x="500" y="40" width="180" height="64" rx="10"/>
+  <text class="title hot-text" x="590" y="67">claimed</text>
+  <text class="sub hot-text" x="590" y="87">egress opens, endpoints live</text>
+
+  <rect class="card" x="740" y="40" width="180" height="64" rx="10"/>
+  <text class="title" x="830" y="67">stopping</text>
+  <text class="sub" x="830" y="87">deleted, expired, or exited</text>
+
+  <path class="wire" d="M200 72 H258" marker-end="url(#a)"/>
+  <text class="label" x="230" y="64">ready</text>
+  <path class="wire-hot" d="M440 72 H498" marker-end="url(#h)"/>
+  <text class="label" x="470" y="64">claim</text>
+  <path class="wire" d="M680 72 H738" marker-end="url(#a)"/>
+  <text class="label" x="710" y="64">delete</text>
+
+  <path class="wire dashed" d="M590 104 V140 H110 V106" marker-end="url(#a)"/>
+  <text class="label" x="350" y="160">each claim starts a refill boot</text>
+</svg>

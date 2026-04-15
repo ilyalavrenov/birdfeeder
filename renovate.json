@@ -1,0 +1,71 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":disableRateLimiting",
+    "schedule:monthly",
+    "helpers:pinGitHubActionDigestsToSemver"
+  ],
+  "timezone": "America/New_York",
+  "labels": [
+    "renovate"
+  ],
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "schedule": [
+      "at any time"
+    ]
+  },
+  "packageRules": [
+    {
+      "matchManagers": [
+        "mise"
+      ],
+      "matchDepNames": [
+        "github:open-telemetry/opentelemetry-collector-releases"
+      ],
+      "extractVersion": "^v(?<version>.+)$"
+    },
+    {
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchPackageNames": [
+        "syn",
+        "prettyplease"
+      ],
+      "groupName": "syn",
+      "separateMajorMinor": false
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/\\.github/workflows/.*\\.yml$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?\\n[\\s\\S]*?: \"(?<currentValue>[^\\s\"]+)\""
+      ]
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/\\.sh$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?:\\s+versioning=(?<versioning>\\S+))?\\n\\w+=(?<currentValue>\\S+)"
+      ]
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^mise-tasks/generate$/"
+      ],
+      "matchStrings": [
+        "raw\\.githubusercontent\\.com/(?<depName>[\\w.-]+/[\\w.-]+)/(?<currentValue>v\\d+\\.\\d+\\.\\d+)/"
+      ],
+      "datasourceTemplate": "github-releases"
+    }
+  ]
+}
