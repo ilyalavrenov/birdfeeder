@@ -6,25 +6,25 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
-anyhow = "1.0.102"
-hickory-proto = { version = "0.25.2", default-features = false, features = ["std"] }
-ipnet = { version = "2.12.0", features = ["serde"] }
-opentelemetry = { version = "0.31.0", default-features = false, features = ["metrics"] }
-serde = { version = "1.0.228", features = ["derive"] }
-tokio = { version = "1.52.0", features = ["io-util", "macros", "net", "process", "rt", "sync", "time"] }
+anyhow = "1.0.104"
+hickory-proto = { version = "0.26.3", default-features = false, features = ["std"] }
+ipnet = { version = "2.12.2", features = ["serde"] }
+opentelemetry = { version = "0.33.1", default-features = false, features = ["metrics"] }
+serde = { version = "1.0.229", features = ["derive"] }
+tokio = { version = "1.54.1", features = ["io-util", "macros", "net", "process", "rt", "sync", "time"] }
 tracing = "0.1.44"
 
 [target.'cfg(target_os = "linux")'.dependencies]
-futures-util = { version = "0.3.32", default-features = false }
-libc = "0.2.185"
-nix = { version = "0.31.2", features = ["fs", "mount", "sched", "user"] }
-rtnetlink = "0.20.0"
+futures-util = { version = "0.3.31", default-features = false }
+libc = "0.2.191"
+nix = { version = "0.31.3", features = ["fs", "mount", "sched", "user"] }
+rtnetlink = "0.24.0"
 
 [dev-dependencies]
-nix = { version = "0.31.2", features = ["sched", "user"] }
-rstest = "0.26.1"
-serde_json = "1.0.149"
-tokio = { version = "1.52.0", features = ["rt-multi-thread"] }
+nix = { version = "0.31.3", features = ["sched", "user"] }
+rstest = "0.28.0"
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["rt-multi-thread"] }
 
 [lints]
 workspace = true

@@ -7,24 +7,24 @@ publish.workspace = true
 
 # the suite lives in tests/smoke. dev/run-linux.sh runs it as root against the binaries it puts in bin/.
 [target.'cfg(target_os = "linux")'.dev-dependencies]
-anyhow = "1.0.102"
-aws-sdk-s3 = { version = "1.129.0", default-features = false, features = ["rt-tokio"] }
-aws-smithy-http-client = { version = "1.1.12", features = ["rustls-ring"] }
+anyhow = "1.0.104"
+aws-sdk-s3 = { version = "1.157.0", default-features = false, features = ["rt-tokio"] }
+aws-smithy-http-client = { version = "1.5.2", features = ["rustls-ring"] }
 axum = { version = "0.8.9", default-features = false, features = ["http1", "tokio"] }
-flate2 = "1.1.9"
+flate2 = "1.1.10"
 hex = "0.4.3"
-hickory-proto = { version = "0.25.2", default-features = false, features = ["std"] }
-nix = { version = "0.31.2", features = ["sched", "signal", "user"] }
-reqwest = { version = "0.13.2", default-features = false }
+hickory-proto = { version = "0.26.3", default-features = false, features = ["std"] }
+nix = { version = "0.31.3", features = ["sched", "signal", "user"] }
+reqwest = { version = "0.13.5", default-features = false }
 roost-api = { path = "../roost-api" }
-rustls = { version = "0.23.38", default-features = false, features = ["ring", "std"] }
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
-sha2 = "0.11.0"
-tar = "0.4.45"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+sha2 = "0.11.1"
+tar = "0.4.46"
 tempfile = "3.27.0"
-tokio = { version = "1.52.0", features = ["io-util", "macros", "net", "process", "rt-multi-thread", "sync", "time"] }
-tonic = { version = "0.14.5", default-features = false, features = ["channel"] }
+tokio = { version = "1.54.1", features = ["io-util", "macros", "net", "process", "rt-multi-thread", "sync", "time"] }
+tonic = { version = "0.14.9", default-features = false, features = ["channel"] }
 
 [lints]
 workspace = true

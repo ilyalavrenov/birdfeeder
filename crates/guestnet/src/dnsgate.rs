@@ -301,7 +301,7 @@ impl<P: Policy> Inner<P> {
             self.count(QueryOutcome::Malformed);
             return None;
         };
-        let [q] = req.queries() else { return self.refuse(&req, client, None) };
+        let [q] = req.queries.as_slice() else { return self.refuse(&req, client, None) };
         let qname = q.name.to_ascii();
         let v4 = match client {
             IpAddr::V4(ip) => Some(ip),
@@ -309,7 +309,7 @@ impl<P: Policy> Inner<P> {
         };
         let Some(grant) = v4.and_then(|ip| self.policy.grant(ip, &qname)) else { return self.refuse(&req, client, Some(&qname)) };
 
-        let mut resp = match self.exchange(query, req.id(), req.max_payload(), transport).await {
+        let mut resp = match self.exchange(query, req.metadata.id, req.max_payload(), transport).await {
             Ok(resp) => resp,
             Err(err) => {
                 self.count(QueryOutcome::UpstreamError);
@@ -319,12 +319,11 @@ impl<P: Policy> Inner<P> {
         };
 
         let mut addrs = BTreeMap::new();
-        for rr in resp.answers_mut() {
+        for rr in &mut resp.answers {
             // AAAA goes through without programming anything: guests are v4-only and their chain drops v6.
-            if let RData::A(a) = *rr.data() {
-                let ttl = rr.ttl().clamp(self.cfg.min_ttl, self.cfg.max_ttl);
-                rr.set_ttl(ttl);
-                addrs.insert(a.0, ttl);
+            if let RData::A(a) = rr.data {
+                rr.ttl = rr.ttl.clamp(self.cfg.min_ttl, self.cfg.max_ttl);
+                addrs.insert(a.0, rr.ttl);
             }
         }
         if !addrs.is_empty()
@@ -351,7 +350,7 @@ impl<P: Policy> Inner<P> {
         let resp = async {
             let resp =
                 timeout(EXCHANGE_TIMEOUT, exchange_udp(self.cfg.upstream, query, id, max_payload)).await.context("udp timed out")??;
-            if !resp.truncated() || transport == Transport::Udp {
+            if !resp.metadata.truncation || transport == Transport::Udp {
                 return Ok(resp);
             }
             timeout(EXCHANGE_TIMEOUT, exchange_tcp(self.cfg.upstream, query)).await.context("tcp timed out")?
@@ -375,7 +374,7 @@ async fn exchange_udp(upstream: SocketAddr, query: &[u8], id: u16, max_payload: 
         let n = sock.recv(&mut buf).await?;
         // a stray or spoofed datagram can't count as the answer.
         if let Ok(resp) = Message::from_vec(&buf[..n])
-            && resp.id() == id
+            && resp.metadata.id == id
         {
             return Ok(resp);
         }
@@ -516,15 +515,15 @@ fn reply(req: &Message, rcode: ResponseCode) -> Option<Vec<u8>> {
 /// An answerless reply with TC set, which sends the guest's resolver back over TCP.
 fn truncated(req: &Message) -> Option<Vec<u8>> {
     let mut resp = answerless(req, ResponseCode::NoError);
-    resp.set_truncated(true);
+    resp.metadata.truncation = true;
     resp.to_vec().ok()
 }
 
 fn answerless(req: &Message, rcode: ResponseCode) -> Message {
-    let mut resp = Message::error_msg(req.id(), req.op_code(), rcode);
-    resp.set_recursion_desired(req.recursion_desired());
-    resp.set_checking_disabled(req.checking_disabled());
-    resp.add_queries(req.queries().to_vec());
+    let mut resp = Message::error_msg(req.metadata.id, req.metadata.op_code, rcode);
+    resp.metadata.recursion_desired = req.metadata.recursion_desired;
+    resp.metadata.checking_disabled = req.metadata.checking_disabled;
+    resp.queries.clone_from(&req.queries);
     resp
 }
 

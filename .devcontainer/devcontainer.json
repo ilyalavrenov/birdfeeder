@@ -1,6 +1,6 @@
 {
   "name": "birdfeeder",
-  "image": "mcr.microsoft.com/devcontainers/base:2.1.7-ubuntu24.04",
+  "image": "mcr.microsoft.com/devcontainers/base:3.0.12-ubuntu26.04",
   "features": {
     "ghcr.io/devcontainers/features/sshd:1.1.0": {}
   },

@@ -92,11 +92,11 @@ impl Policy for Arc<FakePolicy> {
 async fn upstream() -> SocketAddr {
     fn answer(query: &[u8], udp: bool) -> Vec<u8> {
         let req = Message::from_vec(query).unwrap();
-        let name = req.queries()[0].name().clone();
-        let mut resp = Message::error_msg(req.id(), req.op_code(), ResponseCode::NoError);
-        resp.add_queries(req.queries().to_vec());
+        let name = req.queries[0].name.clone();
+        let mut resp = Message::response(req.metadata.id, req.metadata.op_code);
+        resp.queries.clone_from(&req.queries);
         if udp && name.to_ascii().starts_with("big.") {
-            resp.set_truncated(true);
+            resp.metadata.truncation = true;
         } else {
             resp.add_answer(Record::from_rdata(name.clone(), 1, RData::A(A::new(93, 184, 215, 14))));
             resp.add_answer(Record::from_rdata(name, 86400, RData::A(A::new(93, 184, 215, 15))));
@@ -135,8 +135,8 @@ async fn gate(upstream: SocketAddr, policy: &Arc<FakePolicy>) -> SocketAddr {
 }
 
 fn query(name: &str) -> Vec<u8> {
-    let mut msg = Message::new();
-    msg.set_id(0xbeef).set_message_type(MessageType::Query).set_op_code(OpCode::Query).set_recursion_desired(true);
+    let mut msg = Message::new(0xbeef, MessageType::Query, OpCode::Query);
+    msg.metadata.recursion_desired = true;
     msg.add_query(Query::query(Name::from_ascii(name).unwrap(), RecordType::A));
     msg.to_vec().unwrap()
 }
@@ -150,10 +150,10 @@ async fn ask_udp(gate: SocketAddr, name: &str) -> Message {
 }
 
 fn a_records(msg: &Message) -> Vec<(Ipv4Addr, u32)> {
-    msg.answers()
+    msg.answers
         .iter()
-        .filter_map(|rr| match rr.data() {
-            RData::A(a) => Some((a.0, rr.ttl())),
+        .filter_map(|rr| match rr.data {
+            RData::A(a) => Some((a.0, rr.ttl)),
             _ => None,
         })
         .collect()
@@ -167,14 +167,14 @@ async fn programs_before_relaying() {
     let gate = gate(upstream().await, &policy).await;
 
     let resp = ask_udp(gate, "Example.com.").await;
-    assert_eq!((resp.id(), resp.response_code()), (0xbeef, ResponseCode::NoError));
+    assert_eq!((resp.metadata.id, resp.metadata.response_code), (0xbeef, ResponseCode::NoError));
     assert_eq!(a_records(&resp), CLAMPED);
     assert_eq!(*policy.programmed.lock().unwrap(), [BTreeMap::from(CLAMPED)]);
 
     let refused = ask_udp(gate, "example.org.").await;
-    assert_eq!(refused.response_code(), ResponseCode::Refused);
-    assert_eq!(refused.queries(), Message::from_vec(&query("example.org.")).unwrap().queries());
-    assert!(refused.recursion_desired());
+    assert_eq!(refused.metadata.response_code, ResponseCode::Refused);
+    assert_eq!(refused.queries, Message::from_vec(&query("example.org.")).unwrap().queries);
+    assert!(refused.metadata.recursion_desired);
     assert_eq!(policy.programmed.lock().unwrap().len(), 1);
 }
 
@@ -185,8 +185,8 @@ async fn truncated_answers_send_udp_guests_to_tcp() {
 
     // if upstream truncated an answer, a UDP guest gets it truncated, not as a TCP-sized datagram.
     let resp = ask_udp(gate, "big.example.com.").await;
-    assert!(resp.truncated());
-    assert_eq!((resp.id(), resp.response_code()), (0xbeef, ResponseCode::NoError));
+    assert!(resp.metadata.truncation);
+    assert_eq!((resp.metadata.id, resp.metadata.response_code), (0xbeef, ResponseCode::NoError));
     assert_eq!(a_records(&resp), []);
     assert!(policy.programmed.lock().unwrap().is_empty(), "the truncated answer carried no addresses");
 
@@ -198,8 +198,8 @@ async fn truncated_answers_send_udp_guests_to_tcp() {
         stream.read_exact(&mut resp).await.unwrap();
         let resp = Message::from_vec(&resp).unwrap();
         let want = if name == "evil.org." { ResponseCode::Refused } else { ResponseCode::NoError };
-        assert_eq!(resp.response_code(), want, "{name}");
-        assert!(!resp.truncated(), "{name}");
+        assert_eq!(resp.metadata.response_code, want, "{name}");
+        assert!(!resp.metadata.truncation, "{name}");
         if name == "big.example.com." {
             assert_eq!(a_records(&resp), CLAMPED);
         }
@@ -211,11 +211,11 @@ async fn truncated_answers_send_udp_guests_to_tcp() {
 fn truncated_replies_are_answerless_with_tc_set() {
     let req = Message::from_vec(&query("example.com.")).unwrap();
     let resp = Message::from_vec(&truncated(&req).unwrap()).unwrap();
-    assert!(resp.truncated());
-    assert_eq!((resp.id(), resp.response_code()), (0xbeef, ResponseCode::NoError));
-    assert_eq!(resp.queries(), req.queries());
-    assert_eq!(resp.answers(), []);
-    assert!(resp.recursion_desired());
+    assert!(resp.metadata.truncation);
+    assert_eq!((resp.metadata.id, resp.metadata.response_code), (0xbeef, ResponseCode::NoError));
+    assert_eq!(resp.queries, req.queries);
+    assert_eq!(resp.answers, []);
+    assert!(resp.metadata.recursion_desired);
 }
 
 #[tokio::test]
@@ -223,14 +223,14 @@ async fn failures_answer_servfail() {
     let failing = Arc::new(FakePolicy { fail: true, ..FakePolicy::default() });
     let gate_addr = gate(upstream().await, &failing).await;
     let resp = ask_udp(gate_addr, "example.com.").await;
-    assert_eq!(resp.response_code(), ResponseCode::ServFail);
-    assert!(resp.answers().is_empty(), "an unprogrammed address must not reach the guest");
+    assert_eq!(resp.metadata.response_code, ResponseCode::ServFail);
+    assert!(resp.answers.is_empty(), "an unprogrammed address must not reach the guest");
 
     // nothing's listening on a port we just freed.
     let dead = UdpSocket::bind("127.0.0.1:0").await.unwrap().local_addr().unwrap();
     let policy = Arc::new(FakePolicy::default());
     let resp = ask_udp(gate(dead, &policy).await, "example.com.").await;
-    assert_eq!(resp.response_code(), ResponseCode::ServFail);
+    assert_eq!(resp.metadata.response_code, ResponseCode::ServFail);
     assert!(policy.programmed.lock().unwrap().is_empty());
 }
 
@@ -271,7 +271,7 @@ async fn edns_queries_relay_with_their_advertised_payload() {
     let mut msg = Message::from_vec(&query("example.com.")).unwrap();
     let mut edns = hickory_proto::op::Edns::new();
     edns.set_max_payload(1232);
-    msg.set_edns(edns);
+    msg.edns = Some(edns);
     assert_eq!(msg.max_payload(), 1232);
 
     let sock = UdpSocket::bind("127.0.0.1:0").await.unwrap();

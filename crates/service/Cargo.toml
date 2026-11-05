@@ -6,35 +6,35 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
-anyhow = "1.0.102"
-http = "1.4.0"
-http-body = "1.0.1"
-opentelemetry = { version = "0.31.0", default-features = false, features = ["trace", "metrics", "logs", "internal-logs"] }
-opentelemetry-appender-tracing = "0.31.1"
-opentelemetry-http = { version = "0.31.0", default-features = false }
-opentelemetry-otlp = { version = "0.31.1", default-features = false, features = ["grpc-tonic", "http-proto", "reqwest-blocking-client", "gzip-http", "gzip-tonic", "tls-ring", "tls-roots", "trace", "metrics", "logs", "internal-logs"] }
-opentelemetry-resource-detectors = "0.10.0"
-opentelemetry_sdk = { version = "0.31.0", default-features = false, features = ["trace", "metrics", "logs", "internal-logs", "spec_unstable_logs_enabled", "spec_unstable_metrics_views"] }
+anyhow = "1.0.104"
+http = "1.5.0"
+http-body = "1.1.0"
+opentelemetry = { version = "0.33.1", default-features = false, features = ["trace", "metrics", "logs", "internal-logs"] }
+opentelemetry-appender-tracing = "0.33.1"
+opentelemetry-http = { version = "0.33.1", default-features = false }
+opentelemetry-otlp = { version = "0.33.1", default-features = false, features = ["grpc-tonic", "http-proto", "reqwest-blocking-client", "gzip-http", "gzip-tonic", "tls-ring", "tls-roots", "trace", "metrics", "logs", "internal-logs"] }
+opentelemetry-resource-detectors = "0.13.0"
+opentelemetry_sdk = { version = "0.33.1", default-features = false, features = ["trace", "metrics", "logs", "internal-logs"] }
 pin-project-lite = "0.2.17"
 # OTLP over HTTPS, checked against the platform's roots unless a CA is configured. run installs ring as the provider.
-reqwest = { version = "0.12.28", default-features = false, features = ["blocking", "rustls-tls-native-roots-no-provider"] }
-rustls = { version = "0.23.38", default-features = false, features = ["ring", "std"] }
-serde_json = "1.0.149"
-tokio = { version = "1.52.0", features = ["macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
-tokio-stream = { version = "0.1.18", features = ["net"] }
-tonic = { version = "0.14.5", default-features = false, features = ["server", "router", "tls-ring", "tls-native-roots"] }
+reqwest = { version = "0.13.5", default-features = false, features = ["rustls-no-provider"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
+tokio-stream = { version = "0.1", features = ["net"] }
+tonic = { version = "0.14.9", default-features = false, features = ["server", "router", "tls-ring", "tls-native-roots"] }
 tower-layer = "0.3.3"
 tower-service = "0.3.3"
 tracing = "0.1.44"
-tracing-opentelemetry = { version = "0.32.1", default-features = false }
+tracing-opentelemetry = { version = "0.34.0", default-features = false }
 tracing-subscriber = { version = "0.3.23", default-features = false, features = ["fmt", "std", "registry"] }
 
 [dev-dependencies]
-opentelemetry_sdk = { version = "0.31.0", default-features = false, features = ["testing"] }
+opentelemetry_sdk = { version = "0.33.1", default-features = false, features = ["testing"] }
 roost-api = { path = "../roost-api" }
 tempfile = "3.27.0"
-tonic = { version = "0.14.5", default-features = false, features = ["channel"] }
-tokio = { version = "1.52.0", features = ["test-util"] }
+tonic = { version = "0.14.9", default-features = false, features = ["channel"] }
+tokio = { version = "1.54.1", features = ["test-util"] }
 
 [lints]
 workspace = true

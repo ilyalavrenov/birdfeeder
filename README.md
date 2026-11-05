@@ -1,10 +1,10 @@
 # birdfeeder
 
-disposable Firecracker sandboxes for untrusted code. every claim gets a fresh VM restored from a snapshot in about 100 ms.
+disposable Firecracker sandboxes for untrusted code. every claim gets a fresh VM restored from a snapshot.
 
-<img src="docs/demo.webp" width="980" alt="demo: an agent claims a sandbox, reaches PyPI, is blocked elsewhere, and survives a roost restart">
+<img src="docs/demo.webp" width="838" alt="demo: an agent claims a sandbox, reaches PyPI, is blocked elsewhere, and survives a roost restart">
 
-- snapshot restores: about 105 ms and 11 MiB per guest, vs 1.1 s and 73 MiB for a cold boot. it does this with a recorded working set and userfaultfd ([benchmarks](docs/benchmarks.md)). memory can live in S3 too
+- snapshot restores: faster and lighter than a cold boot, using a recorded working set and userfaultfd ([benchmarks](docs/benchmarks.md)). memory can live in S3 too
 - isolation: every VM gets the jailer, its own cgroup, netns and private disk, plus rate limits
 - default-deny egress: each claim lists the CIDRs and domains (`*.example.com`) it can reach. metadata, link-local, cross-guest and SMTP are always blocked
 - OCI workloads: `birdfeeder convert` turns a registry image into a SquashFS blob that a template can run
@@ -17,7 +17,7 @@ disposable Firecracker sandboxes for untrusted code. every claim gets a fresh VM
 
 <img src="docs/diagrams/lifecycle.svg" width="940" alt="guest lifecycle: booting, pooled, claimed, stopping">
 
-<img src="docs/boot-trace.png" width="900" alt="boot trace of one prefetching restore">
+<img src="docs/boot-trace.png" width="838" alt="boot trace of one prefetching restore">
 
 ## example: agent sandboxes
 
@@ -76,15 +76,15 @@ birdfeeder claim agent-sandbox-v1 --allow-fqdn pypi.org,files.pythonhosted.org -
 ```
 
 ```
-NAME      GENERATION  STATE    TEMPLATE          HOST    ENDPOINTS
-host-a-3  7           claimed  agent-sandbox-v1  host-a  exec=10.0.0.5:31008
+NAME    GENERATION  STATE    TEMPLATE          HOST  ENDPOINTS
+demo-0  1           claimed  agent-sandbox-v1  demo  exec=10.0.0.5:31008
 ```
 
 use it, then delete it:
 
 ```sh
-curl --data-binary @task.py http://$(birdfeeder endpoint host-a-3)
-birdfeeder rm host-a-3 --generation 7
+curl --data-binary @task.py http://$(birdfeeder endpoint demo-0)
+birdfeeder rm demo-0
 ```
 
 the API is plain gRPC. retries and fencing are covered in [runtime contracts](docs/runtime.md#claims-and-retries).

@@ -6,23 +6,23 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
-anyhow = "1.0.102"
-clap = { version = "4.6.1", features = ["derive", "env"] }
-futures-util = { version = "0.3.32", default-features = false }
-http = "1.4.0"
-humantime = "2.3.0"
-opentelemetry = { version = "0.31.0", default-features = false, features = ["metrics"] }
+anyhow = "1.0.104"
+clap = { version = "4.6.7", features = ["derive", "env"] }
+futures-util = { version = "0.3", default-features = false }
+http = "1.5.0"
+humantime = "2.4.0"
+opentelemetry = { version = "0.33.1", default-features = false, features = ["metrics"] }
 roost-api = { path = "../roost-api" }
 service = { path = "../service" }
-tokio = { version = "1.52.0", features = ["macros", "net", "rt", "sync", "time"] }
-tonic = { version = "0.14.5", default-features = false, features = ["channel", "server", "router"] }
+tokio = { version = "1.54.1", features = ["macros", "net", "rt", "sync", "time"] }
+tonic = { version = "0.14.9", default-features = false, features = ["channel", "server", "router"] }
 tower-layer = "0.3.3"
 tracing = "0.1.44"
 
 [dev-dependencies]
-opentelemetry_sdk = { version = "0.31.0", default-features = false, features = ["metrics", "testing"] }
-rstest = "0.26.1"
-tokio-stream = { version = "0.1.18", features = ["net"] }
+opentelemetry_sdk = { version = "0.33.1", default-features = false, features = ["metrics", "testing"] }
+rstest = "0.28.0"
+tokio-stream = { version = "0.1", features = ["net"] }
 
 [lints]
 workspace = true

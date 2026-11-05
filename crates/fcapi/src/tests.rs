@@ -6,7 +6,7 @@ use super::*;
 fn huge_pages_use_firecrackers_names() {
     let config = MachineConfiguration {
         cpu_template: None,
-        huge_pages: Some(MachineConfigurationHugePages::X2m),
+        huge_pages: MachineConfigurationHugePages::X2m,
         mem_size_mib: 512,
         smt: false,
         track_dirty_pages: false,
@@ -26,9 +26,11 @@ fn unset_options_are_omitted() {
         resume_vm: Some(true),
         clock_realtime: None,
         enable_diff_snapshots: None,
+        huge_pages: None,
         mem_file_path: None,
         network_overrides: Vec::new(),
         track_dirty_pages: None,
+        vsock_override: None,
     };
     assert_eq!(
         to_value(&load).unwrap(),

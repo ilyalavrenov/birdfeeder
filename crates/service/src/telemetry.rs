@@ -286,8 +286,7 @@ impl Export {
         }
         let mut client = reqwest::blocking::Client::builder().timeout(self.timeout);
         if let Some(ca) = &self.ca {
-            let certs = reqwest::Certificate::from_pem_bundle(ca).context("OTLP CA certificate")?;
-            client = certs.into_iter().fold(client.tls_built_in_root_certs(false), reqwest::blocking::ClientBuilder::add_root_certificate);
+            client = client.tls_certs_only(reqwest::Certificate::from_pem_bundle(ca).context("OTLP CA certificate")?);
         }
         if let Some((certificate, key)) = &self.client {
             let pem = [certificate.as_slice(), b"\n", key.as_slice()].concat();

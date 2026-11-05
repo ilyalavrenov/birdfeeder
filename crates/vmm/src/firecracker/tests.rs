@@ -153,7 +153,7 @@ fn configures_a_jailed_guest() {
     let drive_limits = json!({"bandwidth": {"one_time_burst": 1_u64 << 30, "refill_time": 1000, "size": 64 << 20}});
     let drive = |id: &str, path: &str, root: bool, read_only: bool| {
         json!({"drive_id": id, "path_on_host": path, "is_root_device": root, "is_read_only": read_only, "rate_limiter": drive_limits,
-            "cache_type": "Unsafe", "io_engine": "Sync"})
+            "blk_size": 512, "cache_type": "Unsafe", "discard": false, "io_engine": "Sync"})
     };
     let net_limits = json!({"bandwidth": {"refill_time": 1000, "size": 250 << 20}, "ops": {"refill_time": 1000, "size": 250_000}});
     let want = [
@@ -168,6 +168,7 @@ fn configures_a_jailed_guest() {
         ("/vsock", json!({"guest_cid": 3, "uds_path": "/run/v.sock"})),
         ("/mmds/config", json!({"ipv4_address": "169.254.169.254", "network_interfaces": ["net1"], "version": "V2", "imds_compat": false})),
         ("/mmds", json!({"k": "v"})),
+        ("/serial", json!({"rate_limiter": {"one_time_burst": 4 << 20, "refill_time": 1000, "size": 65536}})),
         ("/actions", json!({"action_type": "InstanceStart"})),
     ];
     assert_eq!(requests, want.map(|(path, body)| (path.to_owned(), body)));
@@ -284,7 +285,7 @@ async fn telemetry_attaches_through_fifos() {
                 "/logger".into(),
                 json!({"log_path": path_str(&log), "level": "Warning", "show_level": true, "show_log_origin": false})
             ),
-            ("PUT".into(), "/metrics".into(), json!({"metrics_path": path_str(&metrics)})),
+            ("PUT".into(), "/metrics".into(), json!({"metrics_path": path_str(&metrics), "emit_id": false})),
         ]
     );
     for fifo in [log, metrics] {

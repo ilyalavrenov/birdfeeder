@@ -39,7 +39,7 @@ fn weed(dir: &std::path::Path) -> Weed {
     let started = SystemTime::now();
     let log = fs::File::create(dir.join("weed.log")).unwrap();
     let child = Command::new("weed")
-        .args(["mini", "-ip", "127.0.0.1", "-ip.bind", "127.0.0.1", "-admin.ui=false"])
+        .args(["mini", "-ip", "127.0.0.1", "-ip.bind", "127.0.0.1", "-bucket", "snapshots", "-admin.ui=false"])
         .args(["-master.port", "29333", "-volume.port", "28089", "-filer.port", "28888"])
         .arg(format!("-s3.port={S3_PORT}"))
         .arg(format!("-dir={}", dir.display()))
@@ -49,15 +49,7 @@ fn weed(dir: &std::path::Path) -> Weed {
         .stdin(Stdio::null())
         .spawn()
         .expect("weed on the PATH");
-    let weed = Weed { child, started };
-    // weed 4.20's mini has no -bucket. the shell waits for the cluster to come up.
-    let status = Command::new("sh")
-        .args(["-c", "echo 's3.bucket.create -name snapshots' | weed shell -master=127.0.0.1:29333"])
-        .stdout(Stdio::null())
-        .status()
-        .expect("run weed shell");
-    assert!(status.success(), "weed shell: {status}");
-    weed
+    Weed { child, started }
 }
 
 fn get(url: &str, range: &str) -> Vec<u8> {

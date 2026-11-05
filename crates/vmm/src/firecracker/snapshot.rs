@@ -81,11 +81,9 @@ impl Driver {
                 mem_file_path: stage_in_vm(inst, MEM),
                 snapshot_path: stage_in_vm(inst, VMSTATE),
                 snapshot_type: Some(SnapshotCreateParamsSnapshotType::Full),
+                sync_snapshot_files: true,
             })
             .await?;
-            for name in [VMSTATE, MEM] {
-                tokio::fs::File::open(stage.join(name)).await?.sync_all().await.with_context(|| format!("fsync {name}"))?;
-            }
             // still paused, so the disk matches the memory image
             copy_disk(&inst.disk, &dir.join(SNAPSHOT_DISK)).await
         }
@@ -129,6 +127,7 @@ impl Driver {
             clock_realtime: None,
             // deprecated alias for track_dirty_pages. dirty tracking would drop hugetlb down to 4k ept mappings
             enable_diff_snapshots: Some(false),
+            huge_pages: None,
             mem_backend: Some(MemoryBackend {
                 backend_path: run_file_in_vm(inst, UFFD_SOCK_NAME),
                 backend_type: MemoryBackendBackendType::Uffd,
@@ -138,6 +137,7 @@ impl Driver {
             resume_vm: Some(true),
             snapshot_path: stage_in_vm(inst, VMSTATE),
             track_dirty_pages: None,
+            vsock_override: None,
         })
         .await?;
         // the snapshot has the mmds config but not its data store

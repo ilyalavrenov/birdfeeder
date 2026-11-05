@@ -14,7 +14,7 @@ use std::time::Duration;
 use anyhow::{Context, Result, bail, ensure};
 use fcapi::{
     BootSource, Drive, DriveCacheType, DriveIoEngine, InstanceActionInfo, InstanceActionInfoActionType, MachineConfiguration,
-    MachineConfigurationHugePages, MmdsConfig, MmdsConfigVersion, NetworkInterface, RateLimiter, TokenBucket, Vsock,
+    MachineConfigurationHugePages, MmdsConfig, MmdsConfigVersion, NetworkInterface, RateLimiter, SerialDevice, TokenBucket, Vsock,
 };
 use nix::errno::Errno;
 use nix::sys::signal::{Signal, kill};
@@ -71,10 +71,6 @@ pub struct Driver {
 impl Driver {
     #[must_use]
     pub fn new(cfg: Config, meter: &Meter) -> Self {
-        // Firecracker 1.15 has no serial rate limiter; it came in 1.16.
-        if cfg.serial_bytes_per_sec.is_some() {
-            tracing::warn!("serial_bytes_per_sec is set, but this Firecracker can't rate-limit the serial console; ignoring it");
-        }
         Self { cfg, metrics: Arc::new(metrics::Metrics::new(meter)), cgroup_root: CGROUP_ROOT.into() }
     }
 }
@@ -97,6 +93,7 @@ const VSOCK_SOCK_NAME: &str = "v.sock";
 const REFILL_TIME_MS: i64 = 1000;
 // boot reads go full speed off a one-time burst, then the sustained cap kicks in
 const DISK_BOOT_BURST_SECS: u64 = 16;
+const SERIAL_BURST_SECS: u64 = 64;
 
 impl crate::Driver for Driver {
     fn setup(&self) -> Result<()> {
@@ -235,6 +232,7 @@ enum ConfigRequest<'a> {
     Vsock(Vsock),
     MmdsConfig(MmdsConfig),
     Mmds(Mmds<'a>),
+    Serial(SerialDevice),
     Action(InstanceActionInfo),
 }
 
@@ -248,6 +246,7 @@ impl Endpoint for ConfigRequest<'_> {
             Self::Vsock(r) => r.path(),
             Self::MmdsConfig(r) => r.path(),
             Self::Mmds(r) => r.path(),
+            Self::Serial(r) => r.path(),
             Self::Action(r) => r.path(),
         }
     }
@@ -312,7 +311,9 @@ impl Driver {
         let net_limits = rate_limiter(net_bytes_per_sec, net_packets_per_sec, 0);
         let drive = |id: &str, path: String, root: bool, read_only: bool| {
             ConfigRequest::Drive(Drive {
+                blk_size: 512,
                 cache_type: DriveCacheType::Unsafe,
+                discard: false,
                 drive_id: id.into(),
                 io_engine: DriveIoEngine::Sync,
                 is_read_only: Some(read_only),
@@ -321,17 +322,14 @@ impl Driver {
                 path_on_host: Some(path),
                 rate_limiter: disk_limits.clone(),
                 socket: None,
+                topology: None,
             })
         };
 
         let mut requests = vec![
             ConfigRequest::Machine(MachineConfiguration {
                 cpu_template: None,
-                huge_pages: Some(if self.cfg.hugepages_2m {
-                    MachineConfigurationHugePages::X2m
-                } else {
-                    MachineConfigurationHugePages::None
-                }),
+                huge_pages: if self.cfg.hugepages_2m { MachineConfigurationHugePages::X2m } else { MachineConfigurationHugePages::None },
                 mem_size_mib: g.mem_mib.into(),
                 smt: false,
                 track_dirty_pages: false,
@@ -353,6 +351,7 @@ impl Driver {
                 guest_mac: Some(g.mac.clone()),
                 host_dev_name: g.tap.clone(),
                 iface_id: "net1".into(),
+                mtu: None,
                 rx_rate_limiter: net_limits.clone(),
                 tx_rate_limiter: net_limits,
             }),
@@ -369,6 +368,12 @@ impl Driver {
             }),
             ConfigRequest::Mmds(Mmds(&boot.metadata)),
         ]);
+        if let Some(rate) = self.cfg.serial_bytes_per_sec {
+            requests.push(ConfigRequest::Serial(SerialDevice {
+                rate_limiter: Some(token_bucket(rate, SERIAL_BURST_SECS)),
+                ..SerialDevice::default()
+            }));
+        }
         requests.push(ConfigRequest::Action(InstanceActionInfo { action_type: InstanceActionInfoActionType::InstanceStart }));
         requests
     }

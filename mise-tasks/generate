@@ -2,5 +2,5 @@
 #MISE description="regenerate the Firecracker API types"
 set -euo pipefail
 
-spec=https://raw.githubusercontent.com/firecracker-microvm/firecracker/v1.15.1/src/firecracker/swagger/firecracker.yaml
+spec=https://raw.githubusercontent.com/firecracker-microvm/firecracker/v1.17.0/src/firecracker/swagger/firecracker.yaml
 exec cargo run --locked --quiet -p fcapigen -- --spec "$spec" --out crates/fcapi/src/types.rs

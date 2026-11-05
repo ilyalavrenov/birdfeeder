@@ -21,7 +21,6 @@ jobs:
     timeout-minutes: 30
     env:
       HEAVY: ${{ github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'integration') }}
-      MISE_LOCKED: "1"
       MISE_RUSTUP_HOME: /home/runner/.local/share/mise/rustup
       CARGO_PROFILE_RELEASE_LTO: "false"
       CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
@@ -35,19 +34,19 @@ jobs:
       checks: write
       pull-requests: read
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 0
       - if: github.event_name == 'pull_request'
         id: changes
-        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
           filters: |
             workflows:
               - '.github/**'
       - if: github.event_name != 'pull_request' || steps.changes.outputs.workflows == 'true'
-        uses: reviewdog/action-actionlint@6fb7acc99f4a1008869fa8a0f09cfca740837d9d # v1.72.0
+        uses: reviewdog/action-actionlint@619a81ec64ff8c0211cd6146eb2b21e8f1d7f440 # v1.81.1
         with:
           reporter: github-check
           filter_mode: nofilter
@@ -55,15 +54,15 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - if: github.event_name != 'pull_request' || steps.changes.outputs.workflows == 'true'
-        uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e # v0.5.3
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
         with:
           advanced-security: false
           annotations: true
-      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
         with:
           # renovate: datasource=github-releases depName=jdx/mise
-          version: "v2026.4.14"
-      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+          version: "v2026.11.0"
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           cache-bin: false
           cache-directories: ~/.cargo/advisory-dbs
@@ -94,13 +93,13 @@ jobs:
           sudo nft list ruleset | tee "$RUNNER_TEMP/smoke-logs/nft-ruleset.txt" > /dev/null
           sudo chown -R "$USER" "$RUNNER_TEMP/smoke-logs"
       - if: failure() && env.HEAVY == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: smoke-logs
           path: ${{ runner.temp }}/smoke-logs
           if-no-files-found: ignore
       - if: ${{ !cancelled() }}
-        uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386 # v6.4.0
+        uses: mikepenz/action-junit-report@4a26df3e2ae132254ba12a53f65a388d0961e786 # v6.7.0
         with:
           report_paths: target/nextest/reports/*.xml
           check_name: rust tests

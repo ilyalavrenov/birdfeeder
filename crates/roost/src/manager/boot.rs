@@ -16,8 +16,6 @@ use crate::snapshots::{BootMode, Lease, Verdict};
 
 const READY_POLL: Duration = Duration::from_millis(250);
 const WARMUP_TIMEOUT: Duration = Duration::from_secs(10);
-const CLOCK_RETRY_WINDOW: Duration = Duration::from_secs(5);
-const CLOCK_RETRY_DELAY: Duration = Duration::from_millis(100);
 const TRIGGER_POOL: &str = "pool";
 
 #[derive(Debug)]
@@ -32,19 +30,6 @@ enum BootOutcome {
 enum Halt {
     Canceled,
     Failed(anyhow::Error),
-}
-
-/// Sets a restored guest's clock. Firecracker before 1.16 can break a vsock connection made before the guest has
-/// acknowledged the restore's transport reset (firecracker#5882), so each try takes a new connection and the time.
-async fn sync_clock(vsock: &Path) -> Result<()> {
-    let started = Instant::now();
-    loop {
-        match guestapi::set_clock(vsock, SystemTime::now()).await {
-            Err(err) if started.elapsed() >= CLOCK_RETRY_WINDOW => return Err(err),
-            Err(_) => tokio::time::sleep(CLOCK_RETRY_DELAY).await,
-            Ok(()) => return Ok(()),
-        }
-    }
 }
 
 impl From<anyhow::Error> for Halt {
@@ -317,7 +302,7 @@ impl<D: Driver + 'static, H: Host> Manager<D, H> {
         }
         started?;
         if restore.is_some() {
-            step(Stage::SyncClock, sync_clock(&inst.vsock_path)).await?;
+            step(Stage::SyncClock, guestapi::set_clock(&inst.vsock_path, SystemTime::now())).await?;
         }
         Ok(())
     }

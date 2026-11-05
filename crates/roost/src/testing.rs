@@ -1,5 +1,7 @@
 //! Fakes for the vmm and host kernel, plus a config with real artifact files, so the manager runs without root.
 
+#![expect(clippy::unused_async_trait_impl, reason = "the fakes answer at once")]
+
 use std::collections::BTreeSet;
 use std::net::{Ipv4Addr, SocketAddr};
 use std::path::{Path, PathBuf};

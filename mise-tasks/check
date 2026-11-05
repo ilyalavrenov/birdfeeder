@@ -25,8 +25,7 @@ fi
 cargo clippy --locked --all-targets ${target:+--target "$target"} -- -D warnings
 
 step "checking Rust dependencies: advisories, licenses, sources"
-# dependencies are frozen at 2026-04-15, so advisories published since then report without failing.
-cargo deny --locked check -W vulnerability -W unsound -W unmaintained -W yanked
+cargo deny --locked check
 
 step "checking for unused Rust dependencies"
 cargo shear

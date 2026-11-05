@@ -9,7 +9,7 @@ use std::process::Command;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use hickory_proto::op::{Message, ResponseCode};
+use hickory_proto::op::Message;
 use hickory_proto::rr::rdata::A;
 use hickory_proto::rr::{RData, Record, RecordType};
 use nix::sched::{CloneFlags, setns};
@@ -239,9 +239,11 @@ async fn resolve(sock: UdpSocket) {
     let mut buf = vec![0; 512];
     while let Ok((n, from)) = sock.recv_from(&mut buf).await {
         let Ok(req) = Message::from_vec(&buf[..n]) else { continue };
-        let mut resp = Message::error_msg(req.id(), req.op_code(), ResponseCode::NoError);
-        resp.set_recursion_desired(req.recursion_desired()).set_recursion_available(true).add_queries(req.queries().to_vec());
-        for q in req.queries().iter().filter(|q| q.query_type() == RecordType::A) {
+        let mut resp = Message::response(req.metadata.id, req.metadata.op_code);
+        resp.metadata.recursion_desired = req.metadata.recursion_desired;
+        resp.metadata.recursion_available = true;
+        resp.queries.clone_from(&req.queries);
+        for q in req.queries.iter().filter(|q| q.query_type() == RecordType::A) {
             resp.add_answer(Record::from_rdata(q.name().clone(), 60, RData::A(A(NAMED))));
         }
         let _ = sock.send_to(&resp.to_vec().expect("encode DNS answer"), from).await;

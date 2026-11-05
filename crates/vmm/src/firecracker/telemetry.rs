@@ -1,6 +1,7 @@
 //! Firecracker's log and metrics. It writes them to FIFOs that roost drains. The writes are nonblocking, so a full
 //! pipe drops them and bumps the `missed_*` metrics.
 
+use std::collections::HashMap;
 use std::os::unix::fs::chown;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -54,7 +55,7 @@ impl Driver {
             show_log_origin: false,
         })
         .await?;
-        api.send(&Metrics { metrics_path: run_file_in_vm(inst, METRICS_NAME) }).await?;
+        api.send(&Metrics { emit_id: false, metrics_path: run_file_in_vm(inst, METRICS_NAME), properties: HashMap::default() }).await?;
         self.adopt_fifos(inst)
     }
 

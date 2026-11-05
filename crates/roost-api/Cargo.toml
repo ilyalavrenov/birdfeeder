@@ -7,21 +7,21 @@ publish.workspace = true
 
 [dependencies]
 pbjson = "0.9.0"
-prost = "0.14.3"
-regex = "1.12.3"
-serde = "1.0.228"
-thiserror = "2.0.18"
-tonic = { version = "0.14.5", default-features = false, features = ["codegen"] }
-tonic-prost = "0.14.5"
+prost = "0.14.4"
+regex = "1"
+serde = "1.0.229"
+thiserror = "2.0.21"
+tonic = { version = "0.14.9", default-features = false, features = ["codegen"] }
+tonic-prost = "0.14.9"
 
 [dev-dependencies]
-rstest = "0.26.1"
+rstest = "0.28.0"
 
 [build-dependencies]
-prost = "0.14.3"
+prost = "0.14.4"
 pbjson-build = "0.9.0"
-protox = "0.9.1"
-tonic-prost-build = "0.14.5"
+protox = "0.10.0"
+tonic-prost-build = "0.14.9"
 
 # build.rs generates the code that uses these and lib.rs include!s it. cargo-shear can't see inside that.
 [package.metadata.cargo-shear]

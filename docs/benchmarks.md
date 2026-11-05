@@ -20,6 +20,6 @@ GitHub Codespace (2 vCPUs, nested KVM), Firecracker 1.17, 1 vCPU / 512 MiB guest
 
 ## where the time goes
 
-<img src="boot-trace.png" width="900" alt="boot trace of one prefetching restore">
+<img src="boot-trace.png" width="838" alt="boot trace of one prefetching restore">
 
 disk copy, network namespace and host nftables all run at the same time before the VMM starts. network setup goes over netlink. a third of it is the stale conntrack sweep, which walks every hash bucket no matter how many flows there are. a claim spends most of its time saving session state and applying nftables. keep `session_state_dir` off the guest disks' ext4 journal, or that fsync gets stuck behind guest writeback.

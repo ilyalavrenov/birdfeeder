@@ -187,7 +187,7 @@ impl SnapshotStore {
         let s3_config = dir.join("s3.json");
         fs::write(&s3_config, identities.to_string()).expect("write weed identities");
         let mut cmd = Command::new("weed");
-        cmd.args(["mini", "-ip", "127.0.0.1", "-ip.bind", "127.0.0.1", "-admin.ui=false"])
+        cmd.args(["mini", "-ip", "127.0.0.1", "-ip.bind", "127.0.0.1", "-bucket", BUCKET, "-admin.ui=false"])
             .args(["-master.port", "19333", "-volume.port", "18089", "-filer.port", "18888"])
             .arg(format!("-s3.port={S3_PORT}"))
             .arg(format!("-dir={}", dir.display()))
@@ -197,16 +197,8 @@ impl SnapshotStore {
         // nothing reads the store afterwards, so just kill it.
         let weed = Service::start_stopped_by(Signal::SIGKILL, "weed", &dir.join("weed.log"), cmd);
         let store = Self { weed: Some(weed), started };
-        // weed 4.20's mini has no -bucket. the shell waits for the cluster to come up.
-        let status = Command::new("sh")
-            .arg("-c")
-            .arg(format!("echo 's3.bucket.create -name {BUCKET}' | weed shell -master=127.0.0.1:19333"))
-            .stdout(std::process::Stdio::null())
-            .status()
-            .expect("run weed shell");
-        assert!(status.success(), "weed shell: {status}");
         let client = s3_client(&Self::config().endpoint);
-        // roost's first export mustn't race weed's startup.
+        // the bucket shows up a bit after the S3 port opens, and roost's first export mustn't race it.
         eventually("seaweedfs accepting uploads", async || {
             client.put_object().bucket(BUCKET).key("probe").body(ByteStream::from_static(b"probe")).send().await?;
             Ok(true)

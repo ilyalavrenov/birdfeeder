@@ -13,9 +13,9 @@ install_only=false
 cd "$(dirname "$0")/.."
 
 # renovate: datasource=github-releases depName=jdx/mise
-mise_version=v2026.4.14
+mise_version=v2026.11.0
 # renovate: datasource=github-releases depName=firecracker-microvm/firecracker
-firecracker_version=v1.15.1
+firecracker_version=v1.17.0
 arch=$(uname -m)
 case "$arch" in
   aarch64) mise_arch=arm64 ;;

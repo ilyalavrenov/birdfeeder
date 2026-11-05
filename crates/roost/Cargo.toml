@@ -6,38 +6,38 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
-anyhow = "1.0.102"
-clap = { version = "4.6.1", features = ["derive"] }
-futures-util = { version = "0.3.32", default-features = false, features = ["alloc"] }
+anyhow = "1.0.104"
+clap = { version = "4.6.7", features = ["derive"] }
+futures-util = { version = "0.3.31", default-features = false, features = ["alloc"] }
 guestapi = { path = "../guestapi" }
 guestnet = { path = "../guestnet" }
 hex = "0.4.3"
-ipnet = { version = "2.12.0", features = ["serde"] }
-nix = { version = "0.31.2", features = ["fs", "hostname", "user"] }
-opentelemetry = { version = "0.31.0", default-features = false, features = ["metrics", "logs"] }
+ipnet = { version = "2.12.2", features = ["serde"] }
+nix = { version = "0.31.3", features = ["fs", "hostname", "user"] }
+opentelemetry = { version = "0.33.1", default-features = false, features = ["metrics", "logs"] }
 relay = { path = "../relay" }
 roost-api = { path = "../roost-api" }
-serde = { version = "1.0.228", features = ["derive", "rc"] }
-serde_json = "1.0.149"
+serde = { version = "1.0.229", features = ["derive", "rc"] }
+serde_json = "1.0.154"
 service = { path = "../service" }
-sha2 = "0.11.0"
+sha2 = "0.11.1"
 snapstore = { path = "../snapstore" }
-thiserror = "2.0.18"
-time = { version = "0.3.47", features = ["formatting", "parsing"] }
-tokio = { version = "1.52.0", features = ["fs", "io-util", "macros", "net", "rt", "sync", "time"] }
-tokio-util = { version = "0.7.18", features = ["rt"] }
-tonic = { version = "0.14.5", default-features = false, features = ["server", "router"] }
+thiserror = "2.0.21"
+time = { version = "0.3.55", features = ["formatting", "parsing"] }
+tokio = { version = "1.54.1", features = ["fs", "io-util", "macros", "net", "rt", "sync", "time"] }
+tokio-util = { version = "0.7.20", features = ["rt"] }
+tonic = { version = "0.14.9", default-features = false, features = ["server", "router"] }
 tracing = "0.1.44"
 vmm = { path = "../vmm" }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-libc = "0.2.185"
+libc = "0.2.191"
 
 [dev-dependencies]
 fcapi = { path = "../fcapi" }
-rstest = "0.26.1"
+rstest = "0.28.0"
 tempfile = "3.27.0"
-tokio = { version = "1.52.0", features = ["rt-multi-thread", "test-util"] }
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "test-util"] }
 
 [lints]
 workspace = true

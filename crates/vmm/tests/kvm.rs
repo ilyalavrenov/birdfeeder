@@ -289,17 +289,7 @@ impl Vm {
 
     /// What roost does after every restore.
     fn set_clock(&self) {
-        // Firecracker before 1.16 can break a connection made before the guest acknowledges the restore's transport
-        // reset (firecracker#5882), so like roost, this retries on a new connection with a fresh time.
-        // a hung attempt only gives up at try_guest_call's 5s read timeout, so the window has to fit several.
-        let started = Instant::now();
-        loop {
-            match self.try_guest_call(&format!("CLOCK 1 {}\n", now_ns())) {
-                Ok(reply) if reply == "OK\n" => return,
-                result => assert!(started.elapsed() < Duration::from_secs(30), "{} set clock: {result:?}", self.inst.name),
-            }
-            thread::sleep(Duration::from_millis(100));
-        }
+        assert_eq!(self.guest_call(&format!("CLOCK 1 {}\n", now_ns())), "OK\n");
     }
 }
 

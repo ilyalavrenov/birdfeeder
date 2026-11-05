@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 #MISE description="run a command on Linux: here on a Linux host, else in a copy of the source in the Lima VM"
 #MISE hide=true
+# VM-bound commands all share one host (KVM, nftables, the installed binaries, the Lima VM), so runs
+# from other worktrees wait for the lock. nested mise run calls inherit it.
+#MISE lock="birdfeeder-host"
 set -euo pipefail
 
 if [[ $(uname -s) == Linux ]]; then
