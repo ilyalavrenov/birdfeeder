@@ -4,7 +4,7 @@ locked = true
 [tools]
 buf = "1.75.0"
 # Linux hosts run the VM-bound tasks in place.
-lima = { version = "2.2.1", os = ["macos"] }
+lima = { version = "2.3.0", os = ["macos"] }
 # the gnu target and zig (dev/zig-cc.sh) let a Mac lint the Linux-only crates; musl builds the static
 # guest binaries. the minimal profile keeps rust-docs out of CI's cached toolchain.
 rust = { version = "1.99.1", profile = "minimal", components = "rustfmt,clippy", targets = "aarch64-unknown-linux-gnu,x86_64-unknown-linux-musl,aarch64-unknown-linux-musl" }

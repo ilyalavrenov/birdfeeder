@@ -132,14 +132,14 @@ url = "https://github.com/seaweedfs/seaweedfs/releases/download/4.52/linux_amd64
 url_api = "https://api.github.com/repos/seaweedfs/seaweedfs/releases/assets/701531356"
 
 [[tools.lima]]
-version = "2.2.1"
+version = "2.3.0"
 backend = "aqua:lima-vm/lima"
-specifiers = ["2.2.1"]
+specifiers = ["2.3.0"]
 
 [tools.lima."platforms.macos-arm64"]
-checksum = "sha256:9e9eacce88f37e185c346bad73aa6136f738d8cdf8c3bb23cd42b071824bc66e"
-url = "https://github.com/lima-vm/lima/releases/download/v2.2.1/lima-2.2.1-Darwin-arm64.tar.gz"
-url_api = "https://api.github.com/repos/lima-vm/lima/releases/assets/607822568"
+checksum = "sha256:b7af444bd8f91d3c307477e562f2cf3bd7595d62b9429185e4fa841563578cfc"
+url = "https://github.com/lima-vm/lima/releases/download/v2.3.0/lima-2.3.0-Darwin-arm64.tar.gz"
+url_api = "https://api.github.com/repos/lima-vm/lima/releases/assets/717479690"
 provenance = "github-attestations"
 
 [[tools.rust]]
