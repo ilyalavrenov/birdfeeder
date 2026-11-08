@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 # renovate: datasource=endoflife-date depName=alpine-linux
-alpine_version=3.24.3
+alpine_version=3.24.4
 # renovate: datasource=github-releases depName=opencontainers/runc
 runc_version=v1.5.2
 bf_init=$(realpath "${1:?birdfeeder-init binary required}")
