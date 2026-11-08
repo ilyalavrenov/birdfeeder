@@ -14,5 +14,5 @@ cargo-deny = "0.20.2"
 "github:nextest-rs/nextest" = { version = "cargo-nextest-0.9.149", bin = "cargo-nextest" }
 "github:Boshen/cargo-shear" = "1.14.0"
 # smoke fixtures. the release also ships otelcol-contrib, otelcol-k8s and others; matching picks the core one.
-"github:open-telemetry/opentelemetry-collector-releases" = { version = "0.164.0", os = ["linux"], matching = "otelcol_" }
+"github:open-telemetry/opentelemetry-collector-releases" = { version = "0.165.0", os = ["linux"], matching = "otelcol_" }
 "github:seaweedfs/seaweedfs" = { version = "4.52", os = ["linux"] }
