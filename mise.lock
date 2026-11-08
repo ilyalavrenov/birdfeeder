@@ -95,24 +95,24 @@ url_api = "https://api.github.com/repos/nextest-rs/nextest/releases/assets/66082
 provenance = "github-attestations"
 
 [[tools."github:open-telemetry/opentelemetry-collector-releases"]]
-version = "0.164.0"
+version = "0.165.0"
 backend = "github:open-telemetry/opentelemetry-collector-releases"
-specifiers = ["0.164.0"]
+specifiers = ["0.165.0"]
 
 [tools."github:open-telemetry/opentelemetry-collector-releases".options]
 matching = "otelcol_"
 
 [tools."github:open-telemetry/opentelemetry-collector-releases"."platforms.linux-arm64"]
-checksum = "sha256:5214414828cc6b72d8738c947839e3b9652693222a23006d529bfea96b03e639"
+checksum = "sha256:e59c320b90885610e346f3f82d2ceca55c5c30ede1549fd14cce577d175901cd"
 checksum_source = "mise-versions"
-url = "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.164.0/otelcol_0.164.0_linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/open-telemetry/opentelemetry-collector-releases/releases/assets/679872589"
+url = "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.165.0/otelcol_0.165.0_linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/open-telemetry/opentelemetry-collector-releases/releases/assets/719738763"
 
 [tools."github:open-telemetry/opentelemetry-collector-releases"."platforms.linux-x64"]
-checksum = "sha256:5db7cf88c2e73a7fdce02b5fa967fcd5dc73bab00b871d947481918dc5093861"
+checksum = "sha256:78570dd4bd6570bc41eb327869ef913bbf91b87dd8170ebebbf43bec71f6370d"
 checksum_source = "mise-versions"
-url = "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.164.0/otelcol_0.164.0_linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/open-telemetry/opentelemetry-collector-releases/releases/assets/679872516"
+url = "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.165.0/otelcol_0.165.0_linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/open-telemetry/opentelemetry-collector-releases/releases/assets/719738623"
 
 [[tools."github:seaweedfs/seaweedfs"]]
 version = "4.52"
