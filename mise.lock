@@ -115,21 +115,21 @@ url = "https://github.com/open-telemetry/opentelemetry-collector-releases/releas
 url_api = "https://api.github.com/repos/open-telemetry/opentelemetry-collector-releases/releases/assets/719738623"
 
 [[tools."github:seaweedfs/seaweedfs"]]
-version = "4.52"
+version = "4.53"
 backend = "github:seaweedfs/seaweedfs"
-specifiers = ["4.52"]
+specifiers = ["4.53"]
 
 [tools."github:seaweedfs/seaweedfs"."platforms.linux-arm64"]
-checksum = "sha256:b70a09540bf8aa2b9ea2a48b3b16abe27e162e90a0c3bf041f8d414caf52de8a"
+checksum = "sha256:2eee359ed0ce8a70b711b30162fadda0cd4ea818e13c73d2f156a76f9359717d"
 checksum_source = "mise-versions"
-url = "https://github.com/seaweedfs/seaweedfs/releases/download/4.52/linux_arm64.tar.gz"
-url_api = "https://api.github.com/repos/seaweedfs/seaweedfs/releases/assets/701563850"
+url = "https://github.com/seaweedfs/seaweedfs/releases/download/4.53/linux_arm64.tar.gz"
+url_api = "https://api.github.com/repos/seaweedfs/seaweedfs/releases/assets/724871219"
 
 [tools."github:seaweedfs/seaweedfs"."platforms.linux-x64"]
-checksum = "sha256:8b538c22d47d0c3fb6792adaa6b0c735a967401270a53427d5a476dcaca9b7ae"
+checksum = "sha256:d1a7dec9f48d8b33895a0ea8951971defc2dc5312906dcc76fa5a5f74a6ee90d"
 checksum_source = "mise-versions"
-url = "https://github.com/seaweedfs/seaweedfs/releases/download/4.52/linux_amd64.tar.gz"
-url_api = "https://api.github.com/repos/seaweedfs/seaweedfs/releases/assets/701531356"
+url = "https://github.com/seaweedfs/seaweedfs/releases/download/4.53/linux_amd64.tar.gz"
+url_api = "https://api.github.com/repos/seaweedfs/seaweedfs/releases/assets/724882169"
 
 [[tools.lima]]
 version = "2.3.0"
