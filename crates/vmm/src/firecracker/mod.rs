@@ -314,6 +314,7 @@ impl Driver {
                 blk_size: 512,
                 cache_type: DriveCacheType::Unsafe,
                 discard: false,
+                dmb_size_mib: None,
                 drive_id: id.into(),
                 io_engine: DriveIoEngine::Sync,
                 is_read_only: Some(read_only),
@@ -348,6 +349,7 @@ impl Driver {
         }
         requests.extend([
             ConfigRequest::Network(NetworkInterface {
+                dmb_size_mib: None,
                 guest_mac: Some(g.mac.clone()),
                 host_dev_name: g.tap.clone(),
                 iface_id: "net1".into(),
@@ -356,6 +358,7 @@ impl Driver {
                 tx_rate_limiter: net_limits,
             }),
             ConfigRequest::Vsock(Vsock {
+                dmb_size_mib: None,
                 guest_cid: VSOCK_GUEST_CID,
                 uds_path: sandbox.path_in_vm(&inst.vsock_path, &format!("run/{VSOCK_SOCK_NAME}")),
                 vsock_id: None,
