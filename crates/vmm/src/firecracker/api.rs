@@ -277,7 +277,7 @@ mod tests {
     async fn sends_json_and_reports_faults() {
         let fc = FakeApi::start(StatusCode::NO_CONTENT);
         let api = Api::new(fc.path());
-        api.send(&Vsock { guest_cid: 3, uds_path: "/run/v.sock".into(), vsock_id: None }).await.unwrap();
+        api.send(&Vsock { dmb_size_mib: None, guest_cid: 3, uds_path: "/run/v.sock".into(), vsock_id: None }).await.unwrap();
         api.send(&Vm { state: VmState::Paused }).await.unwrap();
         assert_eq!(
             fc.take(),
