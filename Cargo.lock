@@ -656,7 +656,7 @@ dependencies = [
  "guestapi",
  "jiff",
  "libc",
- "nix",
+ "nix 0.32.0",
  "rstest",
  "serde",
  "serde_json",
@@ -1370,7 +1370,7 @@ dependencies = [
  "hickory-proto",
  "ipnet",
  "libc",
- "nix",
+ "nix 0.32.0",
  "opentelemetry",
  "rstest",
  "rtnetlink",
@@ -2122,6 +2122,18 @@ dependencies = [
  "cfg-if",
  "cfg_aliases",
  "libc",
+]
+
+[[package]]
+name = "nix"
+version = "0.32.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77730ed34f01f4990cb2ea67fec715ecebc6fab9a6396cf83c5529b13f581bdc"
+dependencies = [
+ "bitflags",
+ "cfg-if",
+ "cfg_aliases",
+ "libc",
  "memoffset",
 ]
 
@@ -2788,7 +2800,7 @@ dependencies = [
  "hex",
  "ipnet",
  "libc",
- "nix",
+ "nix 0.32.0",
  "opentelemetry",
  "relay",
  "roost-api",
@@ -2867,7 +2879,7 @@ dependencies = [
  "netlink-packet-route",
  "netlink-proto",
  "netlink-sys",
- "nix",
+ "nix 0.31.3",
  "tokio",
 ]
 
@@ -3303,7 +3315,7 @@ dependencies = [
  "flate2",
  "hex",
  "hickory-proto",
- "nix",
+ "nix 0.32.0",
  "reqwest",
  "roost-api",
  "rustls",
@@ -3918,7 +3930,7 @@ dependencies = [
  "jiff",
  "libc",
  "memmap2",
- "nix",
+ "nix 0.32.0",
  "rstest",
  "serde",
  "serde_json",
@@ -4085,7 +4097,7 @@ dependencies = [
  "hyper",
  "hyper-util",
  "libc",
- "nix",
+ "nix 0.32.0",
  "opentelemetry",
  "opentelemetry_sdk",
  "rstest",

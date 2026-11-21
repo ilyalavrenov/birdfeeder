@@ -13,7 +13,7 @@ guestapi = { path = "../guestapi" }
 guestnet = { path = "../guestnet" }
 hex = "0.4.3"
 ipnet = { version = "2.12.2", features = ["serde"] }
-nix = { version = "0.31.3", features = ["fs", "hostname", "user"] }
+nix = { version = "0.32.0", features = ["fs", "hostname", "user"] }
 opentelemetry = { version = "0.33.1", default-features = false, features = ["metrics", "logs"] }
 relay = { path = "../relay" }
 roost-api = { path = "../roost-api" }
