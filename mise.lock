@@ -49,26 +49,26 @@ url = "https://github.com/EmbarkStudios/cargo-deny/releases/download/0.20.2/carg
 url_api = "https://api.github.com/repos/EmbarkStudios/cargo-deny/releases/assets/471597689"
 
 [[tools."github:Boshen/cargo-shear"]]
-version = "1.14.0"
+version = "1.14.1"
 backend = "github:Boshen/cargo-shear"
-specifiers = ["1.14.0"]
+specifiers = ["v1.14.1"]
 
 [tools."github:Boshen/cargo-shear"."platforms.linux-arm64"]
-checksum = "sha256:947d69177d812048452866d90b05d1bf95550f487522b922ebf0c0677a5698f8"
-url = "https://github.com/Boshen/cargo-shear/releases/download/v1.14.0/cargo-shear-aarch64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/Boshen/cargo-shear/releases/assets/580851818"
+checksum = "sha256:51da26427a4b0a488440a3d3627cad2337c2f1b527971afa5f6d53c76558be27"
+url = "https://github.com/Boshen/cargo-shear/releases/download/v1.14.1/cargo-shear-aarch64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/Boshen/cargo-shear/releases/assets/742156819"
 provenance = "github-attestations"
 
 [tools."github:Boshen/cargo-shear"."platforms.linux-x64"]
-checksum = "sha256:1d7d860fdbd0d95857ff1f2643cc70d20c5d31236159ad51be7ce436eb3e5bf4"
-url = "https://github.com/Boshen/cargo-shear/releases/download/v1.14.0/cargo-shear-x86_64-unknown-linux-gnu.tar.gz"
-url_api = "https://api.github.com/repos/Boshen/cargo-shear/releases/assets/580851856"
+checksum = "sha256:282df08ba38e7fb2156d4e40bfd70bb9269c9c0563431d7865594ffcd422bb91"
+url = "https://github.com/Boshen/cargo-shear/releases/download/v1.14.1/cargo-shear-x86_64-unknown-linux-gnu.tar.gz"
+url_api = "https://api.github.com/repos/Boshen/cargo-shear/releases/assets/742156885"
 provenance = "github-attestations"
 
 [tools."github:Boshen/cargo-shear"."platforms.macos-arm64"]
-checksum = "sha256:e50b9375b1e93d2293c803819c118337f1e8fce519e4188a93bb0f5e08041ca3"
-url = "https://github.com/Boshen/cargo-shear/releases/download/v1.14.0/cargo-shear-aarch64-apple-darwin.tar.gz"
-url_api = "https://api.github.com/repos/Boshen/cargo-shear/releases/assets/580851820"
+checksum = "sha256:925a8e005a4966ce1e3f63d70743dbc68dd16e3369eea9aa91cfcb3ba61727cf"
+url = "https://github.com/Boshen/cargo-shear/releases/download/v1.14.1/cargo-shear-aarch64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/Boshen/cargo-shear/releases/assets/742156822"
 provenance = "github-attestations"
 
 [[tools."github:nextest-rs/nextest"]]

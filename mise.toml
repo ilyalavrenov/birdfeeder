@@ -12,7 +12,7 @@ zig = { version = "0.17.0", os = ["macos"] }
 cargo-deny = "0.20.2"
 # not in mise's registry; release tags carry the cargo-nextest- prefix.
 "github:nextest-rs/nextest" = { version = "cargo-nextest-0.9.149", bin = "cargo-nextest" }
-"github:Boshen/cargo-shear" = "1.14.0"
+"github:Boshen/cargo-shear" = "v1.14.1"
 # smoke fixtures. the release also ships otelcol-contrib, otelcol-k8s and others; matching picks the core one.
 "github:open-telemetry/opentelemetry-collector-releases" = { version = "0.165.0", os = ["linux"], matching = "otelcol_" }
 "github:seaweedfs/seaweedfs" = { version = "4.53", os = ["linux"] }
