@@ -7,7 +7,7 @@ buf = "1.75.0"
 lima = { version = "2.3.0", os = ["macos"] }
 # the gnu target and zig (dev/zig-cc.sh) let a Mac lint the Linux-only crates; musl builds the static
 # guest binaries. the minimal profile keeps rust-docs out of CI's cached toolchain.
-rust = { version = "1.99.1", profile = "minimal", components = "rustfmt,clippy", targets = "aarch64-unknown-linux-gnu,x86_64-unknown-linux-musl,aarch64-unknown-linux-musl" }
+rust = { version = "1.100.0", profile = "minimal", components = "rustfmt,clippy", targets = "aarch64-unknown-linux-gnu,x86_64-unknown-linux-musl,aarch64-unknown-linux-musl" }
 zig = { version = "0.17.0", os = ["macos"] }
 cargo-deny = "0.20.2"
 # not in mise's registry; release tags carry the cargo-nextest- prefix.
