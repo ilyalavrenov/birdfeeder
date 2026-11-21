@@ -511,7 +511,7 @@ impl<'a> Runner<'a> {
 
     async fn endpoint(&mut self, name: &str, endpoint: Option<&str>) -> Result<(), CliError> {
         let res = self.get_session(name).await?;
-        let endpoints = res.session.map(|s| s.endpoints).unwrap_or_default();
+        let endpoints = res.session.map_or_default(|s| s.endpoints);
         let names = || endpoints.keys().cloned().collect::<Vec<_>>();
         let addr = match (endpoint, endpoints.len()) {
             (Some(want), _) => endpoints.get(want).ok_or_else(|| CliError::NoSuchEndpoint {
