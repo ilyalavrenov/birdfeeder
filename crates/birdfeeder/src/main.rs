@@ -13,11 +13,7 @@ fn main() -> ExitCode {
         }
     };
     let (mut stdout, mut stderr) = (std::io::stdout(), std::io::stderr());
-    let env = cli::Env {
-        stdout: &mut stdout,
-        stderr: &mut stderr,
-        server: std::env::var(cli::SERVER_ENV).ok(),
-        now: chrono::Local::now().fixed_offset(),
-    };
+    let env =
+        cli::Env { stdout: &mut stdout, stderr: &mut stderr, server: std::env::var(cli::SERVER_ENV).ok(), now: jiff::ZonedDateTime::now() };
     runtime.block_on(cli::run(std::env::args_os(), env))
 }

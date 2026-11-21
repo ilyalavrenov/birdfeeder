@@ -4,7 +4,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use chrono::{DateTime, FixedOffset, TimeZone as _, Utc};
+use jiff::{ZonedDateTime, civil::date, tz::TimeZone};
 use roost_api::v1::{
     ClaimSessionRequest, ClaimSessionResponse, DeleteSessionRequest, DeleteSessionResponse, EgressPolicy, GetSessionRequest,
     GetSessionResponse, HostStatusRequest, HostStatusResponse, ListSessionsRequest, ListSessionsResponse, PoolFill, Session, SessionState,
@@ -15,8 +15,8 @@ use rstest::rstest;
 use tokio::net::TcpListener;
 use tonic::{Request, Response, Status};
 
-fn now() -> DateTime<FixedOffset> {
-    Utc.with_ymd_and_hms(2026, 11, 3, 12, 0, 0).unwrap().fixed_offset()
+fn now() -> ZonedDateTime {
+    date(2026, 11, 3).at(12, 0, 0, 0).to_zoned_datetime(TimeZone::UTC).unwrap()
 }
 
 #[derive(Default)]
@@ -448,7 +448,7 @@ async fn expire() {
     assert_eq!((res.code, res.stdout.as_str()), (0, "s1 (generation 7) no longer expires\n"), "{}", res.stderr);
 
     let expiries: Vec<i64> = f.state().expiries.iter().map(|e| e.expires_at_ms).collect();
-    let at = |y, mo, d, h, mi| Utc.with_ymd_and_hms(y, mo, d, h, mi, 0).unwrap().timestamp_millis();
+    let at = |y, mo, d, h, mi| date(y, mo, d).at(h, mi, 0, 0).to_zoned_datetime(TimeZone::UTC).unwrap().timestamp().as_millisecond();
     assert_eq!(expiries, [at(2026, 11, 3, 12, 30), at(2026, 11, 4, 8, 0), 0]);
     assert!(f.state().expiries.iter().all(|e| e.generation == 7));
 

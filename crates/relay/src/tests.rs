@@ -55,7 +55,7 @@ fn guest(listener: UnixListener) -> mpsc::UnboundedReceiver<u64> {
             // limit would hold a second one back for seconds.
             let line = if connection == 0 { "\0".repeat(64 << 10) } else { "hello".into() };
             let record = serde_json::json!({
-                "seq": after + 1, "ts": humantime::format_rfc3339_nanos(std::time::SystemTime::now()).to_string(),
+                "seq": after + 1, "ts": format!("{:.9}", jiff::Timestamp::now()),
                 "container": "web", "stream": "stderr", "line": line,
             });
             conn.write_all(format!("{record}\n").as_bytes()).await.unwrap();

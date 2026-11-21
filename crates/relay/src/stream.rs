@@ -195,7 +195,7 @@ fn decode(data: &[u8], container: &str, previous: u64) -> Result<Wire, Refusal> 
         return Err(fatal("another container's record"));
     }
     let skip = |why| Refusal::Skip { seq: raw.seq, why };
-    let ts = humantime::parse_rfc3339(raw.ts).map_err(|_| skip("timestamp"))?;
+    let ts = raw.ts.parse::<jiff::Timestamp>().ok().and_then(|ts| SystemTime::try_from(ts).ok()).ok_or_else(|| skip("timestamp"))?;
     if raw.line.len() > MAX_LOG_LINE {
         return Err(skip("line too long"));
     }
