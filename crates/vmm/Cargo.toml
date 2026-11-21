@@ -12,7 +12,7 @@ http-body-util = "0.1.5"
 hyper = { version = "1.12.0", features = ["client", "http1"] }
 hyper-util = { version = "0.1.21", features = ["tokio"] }
 libc = "0.2.191"
-nix = { version = "0.31.3", features = ["fs", "signal", "process"] }
+nix = { version = "0.32.0", features = ["fs", "signal", "process"] }
 opentelemetry = { version = "0.33.1", default-features = false, features = ["metrics"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
@@ -23,7 +23,7 @@ tracing-opentelemetry = { version = "0.34.0", default-features = false }
 
 [dev-dependencies]
 hyper = { version = "1.12.0", features = ["server"] }
-nix = { version = "0.31.3", features = ["sched", "socket", "user"] }
+nix = { version = "0.32.0", features = ["sched", "socket", "user"] }
 opentelemetry_sdk = { version = "0.33.1", default-features = false, features = ["metrics", "testing"] }
 rstest = "0.28.0"
 tempfile = "3.27.0"
