@@ -256,7 +256,7 @@ impl Harness {
             }
             let AggregatedMetrics::U64(MetricData::Sum(sum)) = metric.data() else { continue };
             for point in sum.data_points() {
-                let value = point.attributes().find(|kv| kv.key.as_str() == key).map(|kv| kv.value.to_string()).unwrap_or_default();
+                let value = point.attributes().find(|kv| kv.key.as_str() == key).map_or_default(|kv| kv.value.to_string());
                 *out.entry(value).or_default() += point.value();
             }
         }
