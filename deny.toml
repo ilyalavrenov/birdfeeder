@@ -4,6 +4,10 @@ targets = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "x86_64-unkn
 
 [advisories]
 yanked = "deny"
+ignore = [
+    # chrono is unmaintained; only oci-client still pulls it in, and 0.18.0 is its latest release.
+    { id = "RUSTSEC-2026-0543", reason = "transitive via oci-client" },
+]
 
 [licenses]
 # permissive only. CDLA-Permissive-2.0 covers webpki-roots' certificate data.

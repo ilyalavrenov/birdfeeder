@@ -7,10 +7,14 @@ mod tests;
 
 use std::{collections::BTreeMap, ffi::OsString, fmt, future::Future, io::Write, path::PathBuf, process::ExitCode, time::Duration};
 
-use chrono::{DateTime, FixedOffset, SecondsFormat};
 use clap::{
     Arg, ArgAction, ArgGroup, ArgMatches, CommandFactory as _, FromArgMatches, Parser, Subcommand,
     builder::{StringValueParser, TypedValueParser},
+};
+use jiff::{
+    SignedDuration, Span, Timestamp, ZonedDateTime,
+    fmt::temporal::Pieces,
+    tz::{Offset, TimeZone},
 };
 use roost_api::v1::{
     ClaimSessionRequest, DeleteSessionRequest, EgressPolicy, GetSessionRequest, GetSessionResponse, HostStatusRequest, ListSessionsRequest,
@@ -57,7 +61,7 @@ struct Args {
     #[arg(short, long, global = true, value_enum, default_value_t = Output::Table, value_name = "FORMAT")]
     output: Output,
     /// give up after this duration, such as 90s or 2m 30s; 0 waits indefinitely [default: 60s, none for convert and pack]
-    #[arg(long, global = true, value_name = "DURATION", value_parser = humantime::parse_duration)]
+    #[arg(long, global = true, value_name = "DURATION", value_parser = duration)]
     timeout: Option<Duration>,
     #[command(subcommand)]
     command: Command,
@@ -197,8 +201,12 @@ fn trimmed() -> impl TypedValueParser<Value = String> {
     StringValueParser::new().map(|s| s.trim().to_owned())
 }
 
+fn duration(s: &str) -> Result<Duration, jiff::Error> {
+    s.parse::<SignedDuration>()?.try_into()
+}
+
 fn idle_timeout(s: &str) -> Result<Duration, String> {
-    let d = humantime::parse_duration(s).map_err(|e| e.to_string())?;
+    let d = duration(s).map_err(|e| e.to_string())?;
     // the API counts whole milliseconds, where 0 means no timeout.
     if d < Duration::from_millis(1) {
         return Err("must be at least 1ms".into());
@@ -207,10 +215,11 @@ fn idle_timeout(s: &str) -> Result<Duration, String> {
 }
 
 /// When a session expires, from exactly one of --in, --at, and --never.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone)]
 enum Expiry {
-    In(Duration),
-    At(DateTime<FixedOffset>),
+    // a span rather than a duration, so --in 1 month lands on the same day next month.
+    In(Span),
+    At(ZonedDateTime),
     Never,
 }
 
@@ -218,7 +227,7 @@ enum Expiry {
 impl FromArgMatches for Expiry {
     fn from_arg_matches(m: &ArgMatches) -> Result<Self, clap::Error> {
         // the group makes you pass one of the three, and --in/--at parse straight into their variants.
-        Ok(["in", "at"].into_iter().find_map(|id| m.get_one::<Self>(id)).copied().unwrap_or(Self::Never))
+        Ok(["in", "at"].into_iter().find_map(|id| m.get_one::<Self>(id)).cloned().unwrap_or(Self::Never))
     }
 
     fn update_from_arg_matches(&mut self, m: &ArgMatches) -> Result<(), clap::Error> {
@@ -229,12 +238,12 @@ impl FromArgMatches for Expiry {
 
 impl clap::Args for Expiry {
     fn augment_args(cmd: clap::Command) -> clap::Command {
-        let after = |s: &str| match humantime::parse_duration(s) {
-            Ok(d) if d.is_zero() => Err("must be positive".to_owned()),
+        let after = |s: &str| match s.parse::<Span>() {
+            Ok(d) if !d.is_positive() => Err("must be positive".to_owned()),
             Ok(d) => Ok(Self::In(d)),
             Err(e) => Err(e.to_string()),
         };
-        let at = |s: &str| DateTime::parse_from_rfc3339(s).map(Self::At);
+        let at = |s: &str| rfc3339(s).map(Self::At);
         cmd.arg(Arg::new("in").long("in").value_name("DURATION").value_parser(after).help("expire this duration from now"))
             .arg(Arg::new("at").long("at").value_name("TIME").value_parser(at).help("expire at this RFC 3339 time"))
             .arg(Arg::new("never").long("never").action(ArgAction::SetTrue).help("clear the expiry"))
@@ -246,12 +255,27 @@ impl clap::Args for Expiry {
     }
 }
 
+/// Parses an RFC 3339 time, keeping its offset so output can echo it back.
+fn rfc3339(s: &str) -> Result<ZonedDateTime, String> {
+    let pieces = Pieces::parse(s).map_err(|e| e.to_string())?;
+    let (Some(time), Some(offset)) = (pieces.time(), pieces.to_numeric_offset()) else {
+        return Err("want an RFC 3339 time with a UTC offset, such as 2026-11-04T09:00:00+01:00".into());
+    };
+    TimeZone::fixed(offset).to_zoned_datetime(pieces.date().to_datetime(time)).map_err(|e| e.to_string())
+}
+
+/// RFC 3339 to the second, with Z for a zero offset.
+fn rfc3339_secs(t: &ZonedDateTime) -> String {
+    let ts = Timestamp::from_second(t.timestamp().as_second()).expect("truncating a timestamp keeps it in range");
+    if t.offset() == Offset::UTC { ts.to_string() } else { ts.display_with_offset(t.offset()).to_string() }
+}
+
 /// Everything the command reads from or writes to its process.
 pub struct Env<'a> {
     pub stdout: &'a mut dyn Write,
     pub stderr: &'a mut dyn Write,
     pub server: Option<String>,
-    pub now: DateTime<FixedOffset>,
+    pub now: ZonedDateTime,
 }
 
 /// Executes a command line (with the program name first) and returns the process exit code.
@@ -355,7 +379,7 @@ struct Runner<'a> {
     output: Output,
     stdout: &'a mut dyn Write,
     stderr: &'a mut dyn Write,
-    now: DateTime<FixedOffset>,
+    now: ZonedDateTime,
     stop: Stop,
     client: Option<Client>,
 }
@@ -366,7 +390,7 @@ impl<'a> Runner<'a> {
         server_env: Option<String>,
         stdout: &'a mut dyn Write,
         stderr: &'a mut dyn Write,
-        now: DateTime<FixedOffset>,
+        now: ZonedDateTime,
     ) -> Result<Self, CliError> {
         let server = args.server.clone().or(server_env.filter(|s| !s.is_empty())).unwrap_or_else(|| DEFAULT_SERVER.into());
         // these don't hit the API, so the default timeout (sized for an API call) doesn't apply.
@@ -506,16 +530,11 @@ impl<'a> Runner<'a> {
 
     async fn expire(&mut self, e: Expire) -> Result<(), CliError> {
         let expires = match e.when {
-            Expiry::In(d) => Some(
-                chrono::Duration::from_std(d)
-                    .ok()
-                    .and_then(|d| self.now.checked_add_signed(d))
-                    .ok_or_else(|| CliError::Usage("--in is too long".into()))?,
-            ),
+            Expiry::In(d) => Some(self.now.checked_add(d).map_err(|_| CliError::Usage("--in is too long".into()))?),
             Expiry::At(t) => Some(t),
             Expiry::Never => None,
         };
-        let expires_at_ms = expires.map_or(0, |t| t.timestamp_millis().max(1));
+        let expires_at_ms = expires.as_ref().map_or(0, |t| t.timestamp().as_millisecond().max(1));
         roost_api::validate_expiry(expires_at_ms).map_err(|err| CliError::Usage(err.to_string()))?;
         let generation = self.generation(&e.name, e.generation).await?;
         let req = SetSessionExpiryRequest { name: e.name.clone(), generation, expires_at_ms };
@@ -528,7 +547,7 @@ impl<'a> Runner<'a> {
             (Output::Name, _) => writeln!(self.stdout, "{}", e.name),
             (Output::Table, None) => writeln!(self.stdout, "{} (generation {generation}) no longer expires", e.name),
             (Output::Table, Some(t)) => {
-                writeln!(self.stdout, "{} (generation {generation}) expires at {}", e.name, t.to_rfc3339_opts(SecondsFormat::Secs, true))
+                writeln!(self.stdout, "{} (generation {generation}) expires at {}", e.name, rfc3339_secs(&t))
             }
         };
         printed.map_err(CliError::Output)

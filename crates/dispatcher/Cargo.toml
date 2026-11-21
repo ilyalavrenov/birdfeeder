@@ -10,7 +10,7 @@ anyhow = "1.0.104"
 clap = { version = "4.6.7", features = ["derive", "env"] }
 futures-util = { version = "0.3", default-features = false }
 http = "1.5.0"
-humantime = "2.4.0"
+jiff = { version = "1.0.2", default-features = false, features = ["std"] }
 opentelemetry = { version = "0.33.1", default-features = false, features = ["metrics"] }
 roost-api = { path = "../roost-api" }
 service = { path = "../service" }

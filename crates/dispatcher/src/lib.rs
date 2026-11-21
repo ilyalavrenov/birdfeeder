@@ -50,7 +50,7 @@ pub struct Config {
 }
 
 fn positive_duration(s: &str) -> anyhow::Result<Duration> {
-    let duration = humantime::parse_duration(s)?;
+    let duration: Duration = s.parse::<jiff::SignedDuration>()?.try_into()?;
     if duration.is_zero() {
         bail!("must be longer than zero");
     }

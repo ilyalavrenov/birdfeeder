@@ -54,14 +54,17 @@ impl Stream {
 mod rfc3339_nanos {
     use std::time::SystemTime;
 
-    use serde::{Deserialize, Deserializer, Serializer, de};
+    use jiff::Timestamp;
+    use serde::{Deserialize, Deserializer, Serializer, de, ser};
 
     pub fn serialize<S: Serializer>(ts: &SystemTime, s: S) -> Result<S::Ok, S::Error> {
-        s.collect_str(&humantime::format_rfc3339_nanos(*ts))
+        let ts = Timestamp::try_from(*ts).map_err(ser::Error::custom)?;
+        s.collect_str(&format_args!("{ts:.9}"))
     }
 
     pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<SystemTime, D::Error> {
-        humantime::parse_rfc3339(&String::deserialize(d)?).map_err(de::Error::custom)
+        let ts: Timestamp = String::deserialize(d)?.parse().map_err(de::Error::custom)?;
+        SystemTime::try_from(ts).map_err(de::Error::custom)
     }
 }
 
@@ -577,7 +580,10 @@ mod tests {
     fn record_wire_form() {
         let line = r#"{"seq":1,"ts":"2026-11-04T15:00:00.000000000Z","container":"web","stream":"stderr","line":"x"}"#;
         let record: Record = serde_json::from_str(line).unwrap();
-        assert_eq!((record.ts, record.stream), (humantime::parse_rfc3339("2026-11-04T15:00:00Z").unwrap(), Stream::Stderr));
+        assert_eq!(
+            (record.ts, record.stream),
+            (SystemTime::try_from("2026-11-04T15:00:00Z".parse::<jiff::Timestamp>().unwrap()).unwrap(), Stream::Stderr)
+        );
         assert_eq!(serde_json::to_string(&record).unwrap(), line);
     }
 }

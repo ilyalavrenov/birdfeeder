@@ -93,8 +93,13 @@ struct Args {
     #[arg(long, requires = "record")]
     record_pack: Option<std::path::PathBuf>,
     /// Log cumulative fault counters this often; 0s disables.
-    #[arg(long, default_value = "5s", value_parser = humantime::parse_duration)]
+    #[arg(long, default_value = "5s", value_parser = duration)]
     stats_every: std::time::Duration,
+}
+
+#[cfg(target_os = "linux")]
+fn duration(s: &str) -> Result<std::time::Duration, jiff::Error> {
+    s.parse::<jiff::SignedDuration>()?.try_into()
 }
 
 #[cfg(target_os = "linux")]
