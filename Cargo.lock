@@ -1157,6 +1157,7 @@ dependencies = [
  "serde_json",
  "serde_norway",
  "syn 3.0.10",
+ "typespace",
  "typify",
  "ureq",
 ]

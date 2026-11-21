@@ -354,18 +354,6 @@ impl ::std::str::FromStr for DmbSizeMib {
         Ok(Self(value.parse()?))
     }
 }
-impl ::std::convert::TryFrom<&str> for DmbSizeMib {
-    type Error = <i64 as ::std::str::FromStr>::Err;
-    fn try_from(value: &str) -> ::std::result::Result<Self, Self::Error> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<String> for DmbSizeMib {
-    type Error = <i64 as ::std::str::FromStr>::Err;
-    fn try_from(value: String) -> ::std::result::Result<Self, Self::Error> {
-        value.parse()
-    }
-}
 ///`Drive`
 #[derive(::serde::Deserialize, ::serde::Serialize, Clone, Debug, PartialEq)]
 pub struct Drive {
@@ -1055,7 +1043,7 @@ pub struct Metrics {
     ///Path to the named pipe or file where the JSON-formatted metrics are flushed.
     pub metrics_path: ::std::string::String,
     ///Operator-defined key-value pairs emitted under a top-level "properties" field on each metrics line.
-    #[serde(default, skip_serializing_if = ":: std :: collections :: HashMap::is_empty")]
+    #[serde(default, skip_serializing_if = "::std::collections::HashMap::is_empty")]
     pub properties: ::std::collections::HashMap<
         ::std::string::String,
         ::std::string::String,
